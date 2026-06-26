@@ -25,6 +25,7 @@ quote() {
 }
 
 REMOTE_LOG_DIR="$(quote "$LOG_DIR")"
+REMOTE_LOG_GLOB="$(quote "$LOG_GLOB")"
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
 
