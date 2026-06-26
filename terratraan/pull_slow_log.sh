@@ -10,8 +10,12 @@ CLUSTER="bulbasaur-prod"
 BEGIN_TIME="2026-06-26T08:00:00Z"
 END_TIME="2026-06-26T08:30:00Z"
 
-# Slow log path on TiDB SQL nodes
-LOG_FILE="/var/log/tidb/tidb-slow.log"
+# Slow log location on TiDB SQL nodes.
+# TiDB may rotate slow logs into files such as:
+#   tidb-slow-2026-06-26T05-10-10.449.log
+# We scan both the current tidb-slow.log and archived tidb-slow-*.log files.
+LOG_DIR="/var/log/tidb"
+LOG_GLOB="tidb-slow*.log"
 
 # Local output directory
 OUT_DIR="./tidb_slow_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
@@ -25,7 +29,8 @@ quote() {
   printf "%s" "$1" | sed "s/'/'\\\\''/g; s/^/'/; s/$/'/"
 }
 
-REMOTE_LOG_FILE="$(quote "$LOG_FILE")"
+REMOTE_LOG_DIR="$(quote "$LOG_DIR")"
+REMOTE_LOG_GLOB="$(quote "$LOG_GLOB")"
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
 
@@ -34,7 +39,7 @@ mkdir -p "$OUT_DIR"
 echo "Cluster:     ${CLUSTER}"
 echo "Begin time:  ${BEGIN_TIME}"
 echo "End time:    ${END_TIME}"
-echo "Remote log:  ${LOG_FILE}"
+echo "Remote logs: ${LOG_DIR}/${LOG_GLOB}"
 echo "Output dir:  ${OUT_DIR}"
 echo
 
@@ -99,52 +104,54 @@ while read -r NAME IP; do
   # 2026-05-04T00:53:32Z
   #
   gironde ssh "$NAME" "
-    sudo -n awk -v begin=${REMOTE_BEGIN_TIME} -v end=${REMOTE_END_TIME} '
-      function flush_block() {
-        if (has_block && keep) {
-          printf \"%s\", block
-        }
-        block = \"\"
-        keep = 0
-        has_block = 0
-      }
-
-      function normalize_time(raw,    t) {
-        # raw example: 2026-05-04T00:53:32.203724778Z
-        # return:      2026-05-04T00:53:32Z
-        t = raw
-        sub(/\\.[0-9]+Z$/, \"Z\", t)
-        return t
-      }
-
-      /^# Time: / {
-        flush_block()
-
-        has_block = 1
-        block = \$0 \"\n\"
-
-        raw_time = \$3
-        t = normalize_time(raw_time)
-
-        if (t >= begin && t <= end) {
-          keep = 1
-        } else {
+    sudo -n find ${REMOTE_LOG_DIR} -maxdepth 1 -type f -name ${REMOTE_LOG_GLOB} -print \
+      | sort \
+      | sudo -n xargs -r awk -v begin=${REMOTE_BEGIN_TIME} -v end=${REMOTE_END_TIME} '
+        function flush_block() {
+          if (has_block && keep) {
+            printf \"%s\", block
+          }
+          block = \"\"
           keep = 0
+          has_block = 0
         }
 
-        next
-      }
-
-      {
-        if (has_block) {
-          block = block \$0 \"\n\"
+        function normalize_time(raw,    t) {
+          # raw example: 2026-05-04T00:53:32.203724778Z
+          # return:      2026-05-04T00:53:32Z
+          t = raw
+          sub(/\\.[0-9]+Z$/, \"Z\", t)
+          return t
         }
-      }
 
-      END {
-        flush_block()
-      }
-    ' ${REMOTE_LOG_FILE} | gzip -c
+        /^# Time: / {
+          flush_block()
+
+          has_block = 1
+          block = \$0 \"\n\"
+
+          raw_time = \$3
+          t = normalize_time(raw_time)
+
+          if (t >= begin && t <= end) {
+            keep = 1
+          } else {
+            keep = 0
+          }
+
+          next
+        }
+
+        {
+          if (has_block) {
+            block = block \$0 \"\n\"
+          }
+        }
+
+        END {
+          flush_block()
+        }
+      ' | gzip -c
   " > "$OUT_FILE" < /dev/null
 
   rc=$?
