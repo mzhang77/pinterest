@@ -9,8 +9,9 @@ END_TIME="2026/06/26 14:00:00"
 # TiCDC log directory on ticdc nodes
 LOG_DIR="/var/log/tidb"
 
-# Include current ticdc.log and rotated ticdc-*.log files
-LOG_GLOB="ticdc*.log"
+# Set to 1 to print remote file-selection details to stderr.
+# This does not pollute the gzip output.
+DEBUG=1
 
 # Local output directory
 OUT_DIR="./ticdc_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
@@ -25,46 +26,40 @@ quote() {
 }
 
 REMOTE_LOG_DIR="$(quote "$LOG_DIR")"
-REMOTE_LOG_GLOB="$(quote "$LOG_GLOB")"
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
 
 REMOTE_SCRIPT='log_dir="$1"
-log_glob="$2"
-begin="$3"
-end="$4"
+begin="$2"
+end="$3"
+debug="$4"
 
 cd "$log_dir" || exit 10
 
-shopt -s nullglob
-all_files=( $log_glob )
+begin_cmp="${begin:0:19}"
+end_cmp="${end:0:19}"
 
-if (( ${#all_files[@]} == 0 )); then
-  exit 0
-fi
+shopt -s nullglob
+rotated_files=( ticdc-*.log )
+
+selected_files=()
 
 # TiCDC rotated log file names look like:
 # ticdc-2026-06-22T02-10-59.910.log
 # The timestamp in the file name is approximately the last log timestamp in that file.
 # Use it as the rotated file end time to skip obviously irrelevant old/new files.
-begin_cmp="${begin:0:19}"
-end_cmp="${end:0:19}"
+tmp_list="/tmp/ticdc_log_files_$$.list"
+: > "$tmp_list"
 
-has_current=0
-
-for f in "${all_files[@]}"; do
-  if [[ "$f" == "ticdc.log" ]]; then
-    has_current=1
-    continue
-  fi
-
+for f in "${rotated_files[@]}"; do
   if [[ "$f" =~ ^ticdc-([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2})-([0-9]{2})-([0-9]{2}) ]]; then
     file_end="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
-    printf "%s %s\n" "$file_end" "$f"
+    printf "%s %s\n" "$file_end" "$f" >> "$tmp_list"
   fi
-done | sort > /tmp/ticdc_log_files_$$.list
+done
 
-selected_files=()
+sort -o "$tmp_list" "$tmp_list"
+
 prev_end="0000/00/00 00:00:00"
 last_rotated_end="0000/00/00 00:00:00"
 
@@ -84,20 +79,28 @@ while read -r file_date file_time file_name; do
   fi
 
   prev_end="$file_end"
-done < /tmp/ticdc_log_files_$$.list
+done < "$tmp_list"
 
-rm -f /tmp/ticdc_log_files_$$.list
+rm -f "$tmp_list"
 
 # The current ticdc.log has no timestamp in the file name.
-# Always include it when it exists. It is usually only one file, and the awk time filter
-# will still keep only the requested time window.
-if (( has_current == 1 )); then
+# Always include it when it exists. The awk time filter will still keep only the requested window.
+if [[ -f ticdc.log ]]; then
   selected_files+=( "ticdc.log" )
+fi
+
+if [[ "$debug" == "1" ]]; then
+  echo "[remote-debug] begin=$begin end=$end" >&2
+  echo "[remote-debug] begin_cmp=$begin_cmp end_cmp=$end_cmp" >&2
+  echo "[remote-debug] rotated files: ${#rotated_files[@]}" >&2
+  echo "[remote-debug] selected files: ${selected_files[*]}" >&2
 fi
 
 if (( ${#selected_files[@]} == 0 )); then
   exit 0
 fi
+
+tmp_out="/tmp/ticdc_filtered_$$.log"
 
 awk -v begin="$begin_cmp" -v end="$end_cmp" '\''
   match($0, /^\[([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
@@ -106,7 +109,13 @@ awk -v begin="$begin_cmp" -v end="$end_cmp" '\''
       print $0
     }
   }
-'\'' "${selected_files[@]}" 2>/dev/null | gzip -c
+'\'' "${selected_files[@]}" 2>/dev/null > "$tmp_out"
+
+if [[ -s "$tmp_out" ]]; then
+  gzip -c "$tmp_out"
+fi
+
+rm -f "$tmp_out"
 '
 
 mkdir -p "$OUT_DIR"
@@ -118,7 +127,6 @@ SUMMARY_FILE="${OUT_DIR}/collection_summary.txt"
   echo "begin_time=${BEGIN_TIME}"
   echo "end_time=${END_TIME}"
   echo "remote_log_dir=${LOG_DIR}"
-  echo "remote_log_glob=${LOG_GLOB}"
   echo "output_dir=${OUT_DIR}"
   echo
 } > "$SUMMARY_FILE"
@@ -127,7 +135,7 @@ echo "Cluster:     ${CLUSTER}"
 echo "Begin time:  ${BEGIN_TIME}"
 echo "End time:    ${END_TIME}"
 echo "Remote dir:  ${LOG_DIR}"
-echo "Log pattern: ${LOG_GLOB}"
+echo "Debug:       ${DEBUG}"
 echo "Output dir:  ${OUT_DIR}"
 echo
 
@@ -175,7 +183,7 @@ while read -r NAME IP; do
   echo "============================================================"
 
   printf '%s\n' "$REMOTE_SCRIPT" \
-    | gironde ssh "$NAME" "sudo -n bash -s -- ${REMOTE_LOG_DIR} ${REMOTE_LOG_GLOB} ${REMOTE_BEGIN_TIME} ${REMOTE_END_TIME}" \
+    | gironde ssh "$NAME" "sudo -n bash -s -- ${REMOTE_LOG_DIR} ${REMOTE_BEGIN_TIME} ${REMOTE_END_TIME} ${DEBUG}" \
     > "$OUT_FILE"
 
   rc=$?
