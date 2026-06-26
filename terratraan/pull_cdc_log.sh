@@ -4,7 +4,7 @@ set -u
 # ===== User variables =====
 CLUSTER="bulbasaur-prod"
 BEGIN_TIME="2026/06/26 13:00:00"
-END_TIME="2026/06/26 14:30:00"
+END_TIME="2026/06/26 14:00:00"
 
 # TiCDC log directory on ticdc nodes
 LOG_DIR="/var/log/tidb"
@@ -37,20 +37,77 @@ end="$4"
 cd "$log_dir" || exit 10
 
 shopt -s nullglob
-files=( $log_glob )
+all_files=( $log_glob )
 
-if (( ${#files[@]} == 0 )); then
+if (( ${#all_files[@]} == 0 )); then
   exit 0
 fi
 
-awk -v begin="$begin" -v end="$end" '\''
+# TiCDC rotated log file names look like:
+# ticdc-2026-06-22T02-10-59.910.log
+# The timestamp in the file name is approximately the last log timestamp in that file.
+# Use it as the rotated file end time to skip obviously irrelevant old/new files.
+begin_cmp="${begin:0:19}"
+end_cmp="${end:0:19}"
+
+has_current=0
+
+for f in "${all_files[@]}"; do
+  if [[ "$f" == "ticdc.log" ]]; then
+    has_current=1
+    continue
+  fi
+
+  if [[ "$f" =~ ^ticdc-([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2})-([0-9]{2})-([0-9]{2}) ]]; then
+    file_end="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:${BASH_REMATCH[6]}"
+    printf "%s %s\n" "$file_end" "$f"
+  fi
+done | sort > /tmp/ticdc_log_files_$$.list
+
+selected_files=()
+prev_end="0000/00/00 00:00:00"
+last_rotated_end="0000/00/00 00:00:00"
+
+while read -r file_date file_time file_name; do
+  [[ -z "$file_date" || -z "$file_time" || -z "$file_name" ]] && continue
+
+  file_end="$file_date $file_time"
+  last_rotated_end="$file_end"
+
+  # A rotated file roughly covers: previous rotated end time -> this file end time.
+  # It can overlap the query window if:
+  #   file_end >= begin AND prev_end <= end
+  if [[ "$file_end" > "$begin_cmp" || "$file_end" == "$begin_cmp" ]]; then
+    if [[ "$prev_end" < "$end_cmp" || "$prev_end" == "$end_cmp" ]]; then
+      selected_files+=( "$file_name" )
+    fi
+  fi
+
+  prev_end="$file_end"
+done < /tmp/ticdc_log_files_$$.list
+
+rm -f /tmp/ticdc_log_files_$$.list
+
+# Current ticdc.log roughly starts after the latest rotated log.
+# Scan it only when the query window may reach the current log range.
+if (( has_current == 1 )); then
+  if [[ "$last_rotated_end" < "$end_cmp" || "$last_rotated_end" == "$end_cmp" ]]; then
+    selected_files+=( "ticdc.log" )
+  fi
+fi
+
+if (( ${#selected_files[@]} == 0 )); then
+  exit 0
+fi
+
+awk -v begin="$begin_cmp" -v end="$end_cmp" '\''
   match($0, /^\[([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
     t = m[1]
     if (t >= begin && t <= end) {
       print $0
     }
   }
-'\'' "${files[@]}" 2>/dev/null | gzip -c
+'\'' "${selected_files[@]}" 2>/dev/null | gzip -c
 '
 
 mkdir -p "$OUT_DIR"
