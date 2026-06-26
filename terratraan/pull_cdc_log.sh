@@ -1,11 +1,10 @@
-
 #!/usr/bin/env bash
 set -u
 
 # ===== User variables =====
 CLUSTER="bulbasaur-prod"
-BEGIN_TIME="2026/06/26 17:20:00"
-END_TIME="2026/06/26 17:30:00"
+BEGIN_TIME="2026/06/26 08:00:00"
+END_TIME="2026/06/26 08:30:00"
 
 # TiCDC log directory on ticdc nodes
 LOG_DIR="/var/log/tidb"
@@ -28,6 +27,30 @@ quote() {
 REMOTE_LOG_DIR="$(quote "$LOG_DIR")"
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
+
+REMOTE_SCRIPT='log_dir="$1"
+log_glob="$2"
+begin="$3"
+end="$4"
+
+cd "$log_dir" || exit 10
+
+shopt -s nullglob
+files=( $log_glob )
+
+if (( ${#files[@]} == 0 )); then
+  exit 0
+fi
+
+awk -v begin="$begin" -v end="$end" '\''
+  match($0, /^\[([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
+    t = m[1]
+    if (t >= begin && t <= end) {
+      print $0
+    }
+  }
+'\'' "${files[@]}" 2>/dev/null | gzip -c
+'
 
 mkdir -p "$OUT_DIR"
 
@@ -94,37 +117,9 @@ while read -r NAME IP; do
   echo "Output:        ${OUT_FILE}"
   echo "============================================================"
 
-  # TiCDC log time format:
-  # [2026/06/26 17:29:00.888 +00:00] [INFO] ...
-  #
-  # We compare only the first 19 chars:
-  # 2026/06/26 17:29:00
-  #
-  # BEGIN_TIME and END_TIME must use:
-  # YYYY/MM/DD HH:MM:SS
-  #
-  # This scans both ticdc.log and rotated ticdc-*.log files.
-  gironde ssh "$NAME" "
-    sudo -n bash -c '
-      cd ${REMOTE_LOG_DIR} || exit 10
-
-      shopt -s nullglob
-      files=( ${LOG_GLOB} )
-
-      if (( \${#files[@]} == 0 )); then
-        exit 0
-      fi
-
-      awk -v begin=${REMOTE_BEGIN_TIME} -v end=${REMOTE_END_TIME} '\\''
-        match(\$0, /^\[([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
-          t = m[1]
-          if (t >= begin && t <= end) {
-            print \$0
-          }
-        }
-      '\\'' \"\${files[@]}\" 2>/dev/null | gzip -c
-    '
-  " > "$OUT_FILE" < /dev/null
+  printf '%s\n' "$REMOTE_SCRIPT" \
+    | gironde ssh "$NAME" "sudo -n bash -s -- ${REMOTE_LOG_DIR} ${REMOTE_LOG_GLOB} ${REMOTE_BEGIN_TIME} ${REMOTE_END_TIME}" \
+    > "$OUT_FILE"
 
   rc=$?
 

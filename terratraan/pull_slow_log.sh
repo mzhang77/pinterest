@@ -3,12 +3,12 @@
 set -u
 
 # ===== User variables =====
-CLUSTER="ads-index-staging-prod"
+CLUSTER="bulbasaur-prod"
 
 # UTC time range.
 # Format must be: YYYY-MM-DDTHH:MM:SSZ
-BEGIN_TIME="2026-06-25T01:15:00Z"
-END_TIME="2026-06-25T02:45:00Z"
+BEGIN_TIME="2026-06-26T08:00:00Z"
+END_TIME="2026-06-26T08:30:00Z"
 
 # Slow log path on TiDB SQL nodes
 LOG_FILE="/var/log/tidb/tidb-slow.log"
