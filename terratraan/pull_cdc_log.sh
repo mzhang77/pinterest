@@ -88,12 +88,11 @@ done < /tmp/ticdc_log_files_$$.list
 
 rm -f /tmp/ticdc_log_files_$$.list
 
-# Current ticdc.log roughly starts after the latest rotated log.
-# Scan it only when the query window may reach the current log range.
+# The current ticdc.log has no timestamp in the file name.
+# Always include it when it exists. It is usually only one file, and the awk time filter
+# will still keep only the requested time window.
 if (( has_current == 1 )); then
-  if [[ "$last_rotated_end" < "$end_cmp" || "$last_rotated_end" == "$end_cmp" ]]; then
-    selected_files+=( "ticdc.log" )
-  fi
+  selected_files+=( "ticdc.log" )
 fi
 
 if (( ${#selected_files[@]} == 0 )); then
