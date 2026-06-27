@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-namespace="bulk-ingestion-prod"
-begin_time="2026-06-18T00:30:00"
-end_time="2026-06-18T04:00:00"
+namespace="pingraph-shared4-prod"
+begin_time="2026-06-26T22:30:00"
+end_time="2026-06-26T23:30:00"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"

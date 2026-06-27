@@ -3,11 +3,11 @@
 set -euo pipefail
 
 BASE_URL="http://localhost:4917"
-CLUSTER_NAME="bulk-ingestion-prod-eks"
-NAMESPACE="bulk-ingestion-prod"
+CLUSTER_NAME="pingraph-shared4-prod-eks"
+NAMESPACE="pingraph-shared4-prod"
 
-START="2026-06-18 00:20:00"
-END="2026-06-18 00:30:00"
+START="2026-06-26 22:30:00"
+END="2026-06-26 23:30:00"
 STEP_MINUTES=10
 
 current="$START"
