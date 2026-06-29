@@ -29,11 +29,29 @@ LOCAL_DIR="${2:-./devapp_files_$(date +%Y%m%d_%H%M%S)}"
 
 mkdir -p "$LOCAL_DIR"
 
+ARCHIVE_NAME="devapp_dir_$(date +%Y%m%d_%H%M%S).tar.gz"
+REMOTE_ARCHIVE="/tmp/${ARCHIVE_NAME}"
+LOCAL_ARCHIVE="${LOCAL_DIR}/${ARCHIVE_NAME}"
+
+cleanup_remote_archive() {
+    ssh devapp "rm -f '${REMOTE_ARCHIVE}'" >/dev/null 2>&1 || true
+}
+trap cleanup_remote_archive EXIT
+
 echo "Signing with gironde..."
 gironde sign -ca github
 
-echo "Copying files from devapp:${REMOTE_DIR} to ${LOCAL_DIR} ..."
-scp -r "devapp:${REMOTE_DIR}/." "$LOCAL_DIR/"
+echo "Compressing ${REMOTE_DIR} on devapp..."
+ssh devapp "tar -czf '${REMOTE_ARCHIVE}' -C '${REMOTE_DIR}' ."
+
+echo "Copying archive from devapp:${REMOTE_ARCHIVE} to ${LOCAL_ARCHIVE} ..."
+scp "devapp:${REMOTE_ARCHIVE}" "${LOCAL_ARCHIVE}"
+
+echo "Extracting archive to ${LOCAL_DIR} ..."
+tar -xzf "${LOCAL_ARCHIVE}" -C "${LOCAL_DIR}"
+
+echo "Removing local archive ${LOCAL_ARCHIVE} ..."
+rm -f "${LOCAL_ARCHIVE}"
 
 echo
 echo "Done."
