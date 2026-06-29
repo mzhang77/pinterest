@@ -5,12 +5,12 @@ set -euo pipefail
 
 usage() {
     cat <<EOF
-Usage: $(basename "$0") <remote_dir> [local_dir]
+Usage: $(basename "$0") <remote_path> [local_dir]
 
-Copy all files under a directory from devapp to local machine.
+Copy a file or all files under a directory from devapp to local machine.
 
 Arguments:
-  remote_dir   Directory path on devapp
+  remote_path  File or directory path on devapp
   local_dir    Local output directory, default: ./devapp_files_<timestamp>
 
 Example:
@@ -24,12 +24,12 @@ if [[ $# -lt 1 || $# -gt 2 ]]; then
     exit 1
 fi
 
-REMOTE_DIR="$1"
+REMOTE_PATH="$1"
 LOCAL_DIR="${2:-./devapp_files_$(date +%Y%m%d_%H%M%S)}"
 
 mkdir -p "$LOCAL_DIR"
 
-ARCHIVE_NAME="devapp_dir_$(date +%Y%m%d_%H%M%S).tar.gz"
+ARCHIVE_NAME="devapp_path_$(date +%Y%m%d_%H%M%S).tar.gz"
 REMOTE_ARCHIVE="/tmp/${ARCHIVE_NAME}"
 LOCAL_ARCHIVE="${LOCAL_DIR}/${ARCHIVE_NAME}"
 
@@ -41,8 +41,20 @@ trap cleanup_remote_archive EXIT
 echo "Signing with gironde..."
 gironde sign -ca github
 
-echo "Compressing ${REMOTE_DIR} on devapp..."
-ssh devapp "tar -czf '${REMOTE_ARCHIVE}' -C '${REMOTE_DIR}' ."
+echo "Compressing ${REMOTE_PATH} on devapp..."
+ssh devapp "
+set -euo pipefail
+if [[ -d '${REMOTE_PATH}' ]]; then
+    tar -czf '${REMOTE_ARCHIVE}' -C '${REMOTE_PATH}' .
+elif [[ -f '${REMOTE_PATH}' ]]; then
+    remote_parent=\$(dirname '${REMOTE_PATH}')
+    remote_base=\$(basename '${REMOTE_PATH}')
+    tar -czf '${REMOTE_ARCHIVE}' -C \"\${remote_parent}\" \"\${remote_base}\"
+else
+    echo 'Remote path does not exist or is not a regular file/directory: ${REMOTE_PATH}' >&2
+    exit 1
+fi
+"
 
 echo "Copying archive from devapp:${REMOTE_ARCHIVE} to ${LOCAL_ARCHIVE} ..."
 scp "devapp:${REMOTE_ARCHIVE}" "${LOCAL_ARCHIVE}"
