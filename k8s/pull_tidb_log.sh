@@ -5,8 +5,8 @@ set -euo pipefail
 
 NS="catalog-dev"
 
-BEGIN_TIME="2025/06/28 17:00:00.000 +00:00"
-END_TIME="2027/06/29 17:30:00.000 +00:00"
+BEGIN_TIME="2026/06/28 17:00:00.000 +00:00"
+END_TIME="2025/06/29 17:30:00.000 +00:00"
 
 OUT_DIR="tidb_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"
