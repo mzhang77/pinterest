@@ -33,7 +33,7 @@ PY
 
     echo "Running: $cluster_name, $current -> $next"
 
-    tiupmetrics.sh "$cluster_name" "$current" "$next"
+    tiup_metrics.sh "$cluster_name" "$current" "$next"
 
     current="$next"
 done
