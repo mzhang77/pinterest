@@ -5,8 +5,8 @@ set -euo pipefail
 
 NS="pingraph-shared5-prod"
 
-BEGIN_TIME="2025/07/22 13:30:00.000 +00:00"
-END_TIME="2027/07/22 14:30:00.000 +00:00"
+BEGIN_TIME="2026/07/22 13:30:00.000 +00:00"
+END_TIME="2026/07/22 14:30:00.000 +00:00"
 
 OUT_DIR="pd_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"
