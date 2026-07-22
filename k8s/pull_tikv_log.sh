@@ -2,10 +2,10 @@
 #!/bin/bash
 set -u
 
-BEGIN_TIME="2025/06/14 00:00:00 +00:00"
-END_TIME="2027/06/15 00:00:00 +00:00"
+BEGIN_TIME="2026/07/22 13:30:00 +00:00"
+END_TIME="2026/07/22 14:30:00 +00:00"
 
-NS="bulk-ingestion-prod"
+NS="pingraph-shared5-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/tikv-log-collect"
 LOCAL_OUT_DIR="./tikv_logs_$(date +%Y%m%d_%H%M%S)"
