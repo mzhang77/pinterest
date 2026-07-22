@@ -5,7 +5,7 @@ set -euo pipefail
 cluster_name="bulbasaur-prod"
 begin="2026-07-21 12:30:00"
 end="2026-07-21 14:00:00"
-interval=30
+interval=10
 
 current="$begin"
 
