@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-namespace="catalog-dev"
-begin_time="2026-06-28T17:00:00"
-end_time="2026-06-29T17:30:00"
+namespace="pingraph-socialgraph-prod"
+begin_time="2026-07-23T08:00:00"
+end_time="2026-07-23T08:30:00"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"
