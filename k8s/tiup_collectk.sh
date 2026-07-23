@@ -180,6 +180,8 @@ while (( current_epoch < end_epoch )); do
     echo "Collected data directory: $data_dir"
     echo "Uploading collected data..."
 
+    tiup diag config clinic.token eyJrIjoiNmZpd3lOQUk0YVZqNjg3UiIsInUiOjUxOCwiaWQiOjEzNzI4MTMwODkxOTU2NTEyODZ9
+    tiup diag config clinic.region US
     tiup diag upload "$data_dir" 2>&1 | tee "$upload_log"
 
     upload_status=${PIPESTATUS[0]}
