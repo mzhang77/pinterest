@@ -9,8 +9,8 @@ set -uo pipefail
 cluster_name="pingraph-socialgraph-prod-eks"
 namespace="pingraph-socialgraph-prod"
 
-begin="2026-07-223 08:00:00"
-end="2026-07-22 08:30:00"
+begin="2026-07-23 08:00:00"
+end="2026-07-23 08:30:00"
 
 # Interval in minutes.
 interval=10
