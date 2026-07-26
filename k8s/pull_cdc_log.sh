@@ -3,14 +3,14 @@
 
 set -u
 
-NS="bulk-ingestion-prod"
+NS="shared2-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/ticdc-log-collect"
 LOCAL_OUT_DIR="./ticdc_logs_$(date +%Y%m%d_%H%M%S)"
 
 # UTC time, same format as ticdc log header
-BEGIN_TIME="2026/06/18 00:30:00"
-END_TIME="2026/06/18 04:00:00"
+BEGIN_TIME="2026/07/25 21:30:00"
+END_TIME="2026/07/26 03:30:00"
 
 mkdir -p "$LOCAL_OUT_DIR"
 
