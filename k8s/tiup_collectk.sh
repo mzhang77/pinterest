@@ -13,7 +13,7 @@ begin="2026-07-25 21:30:00"
 end="2026-07-25 23:30:00"
 
 # Interval in minutes.
-interval=10
+interval=30
 
 # Summary file containing each time range, local data directory, and Clinic URL.
 summary_file="./diag_upload_summary_$(date '+%Y%m%d_%H%M%S').txt"
