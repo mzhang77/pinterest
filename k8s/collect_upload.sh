@@ -7,7 +7,7 @@ CLUSTER_NAME="vulpix-prod-eks"
 NAMESPACE="vulpix-prod"
 
 START="2026-07-29 02:00:00"
-END="2026-07-22 02:10:00"
+END="2026-07-29 02:10:00"
 STEP_MINUTES=10
 
 current="$START"
