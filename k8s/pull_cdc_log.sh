@@ -3,14 +3,14 @@
 
 set -u
 
-NS="shared2-prod"
+NS="catalog-dev"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/ticdc-log-collect"
 LOCAL_OUT_DIR="./ticdc_logs_$(date +%Y%m%d_%H%M%S)"
 
 # UTC time, same format as ticdc log header
-BEGIN_TIME="2026/07/25 21:30:00"
-END_TIME="2026/07/26 03:30:00"
+BEGIN_TIME="2026/07/29 11:30:00"
+END_TIME="2026/07/29 17:30:00"
 
 mkdir -p "$LOCAL_OUT_DIR"
 
