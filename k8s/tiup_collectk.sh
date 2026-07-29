@@ -6,18 +6,17 @@ set -uo pipefail
 # Configuration
 ###############################################################################
 
-cluster_name="shared2-prod-eks"
-namespace="shared2-prod"
+cluster_name="catalog-dev-eks"
+namespace="catalog-dev"
 
-begin="2026-07-25 21:30:00"
-end="2026-07-25 23:30:00"
+begin="2026-07-29 11:30:00"
+end="2026-07-29 17:30:00"
 
 # Interval in minutes.
 interval=30
 
 # Summary file containing each time range, local data directory, and Clinic URL.
 summary_file="./diag_upload_summary_$(date '+%Y%m%d_%H%M%S').txt"
-
 
 ###############################################################################
 # Validation
