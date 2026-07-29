@@ -3,11 +3,11 @@
 set -euo pipefail
 
 BASE_URL="http://localhost:4917"
-CLUSTER_NAME="pingraph-shared5-prod-eks"
-NAMESPACE="pingraph-shared5-prod"
+CLUSTER_NAME="vulpix-prod-eks"
+NAMESPACE="vulpix-prod"
 
-START="2026-07-22 13:30:00"
-END="2026-07-22 14:30:00"
+START="2026-07-29 02:00:00"
+END="2026-07-22 02:10:00"
 STEP_MINUTES=10
 
 current="$START"
