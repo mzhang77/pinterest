@@ -10,7 +10,7 @@ cluster_name="catalog-dev-eks"
 namespace="catalog-dev"
 
 begin="2026-07-29 11:30:00"
-end="2026-07-29 17:30:00"
+end="2026-07-29 11:30:00"
 
 # Interval in minutes.
 interval=30
