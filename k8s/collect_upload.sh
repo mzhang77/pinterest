@@ -3,12 +3,12 @@
 set -euo pipefail
 
 BASE_URL="http://localhost:4917"
-CLUSTER_NAME="vulpix-prod-eks"
-NAMESPACE="vulpix-prod"
+CLUSTER_NAME="catalog-dev-eks"
+NAMESPACE="catalog-dev"
 
-START="2026-07-29 02:00:00"
-END="2026-07-29 02:10:00"
-STEP_MINUTES=10
+START="2026-07-29 15:30:00"
+END="2026-07-29 22:30:00"
+STEP_MINUTES=30
 
 current="$START"
 
