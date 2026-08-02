@@ -51,3 +51,4 @@ gironde ssh -T "$HOST" \
 echo
 echo "Copy completed:"
 echo "  $LOCAL_DIR/$REMOTE_NAME"
+
