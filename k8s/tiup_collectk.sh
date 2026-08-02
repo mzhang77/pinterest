@@ -6,8 +6,8 @@ set -uo pipefail
 # Configuration
 ###############################################################################
 
-cluster_name="catalog-dev-eks"
-namespace="catalog-dev"
+cluster_name="pingraph-shared5-prod-eks"
+namespace="pingraph-shared5-prod"
 
 begin="2026-07-29 11:30:00"
 end="2026-07-30 11:30:00"
