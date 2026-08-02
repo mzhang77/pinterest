@@ -163,6 +163,7 @@ while (( current_epoch < end_epoch )); do
         --namespace "$namespace" \
         --from "$chunk_begin" \
         --to "$chunk_end" \
+        --include monitor.metric \
         -y 2>&1 | tee "$collect_log"
 
     collect_status=${PIPESTATUS[0]}
