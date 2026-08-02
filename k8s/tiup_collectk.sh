@@ -13,7 +13,7 @@ begin="2026-07-29 11:30:00"
 end="2026-07-30 11:30:00"
 
 # Interval in minutes.
-interval=30
+interval=10
 
 # Upload switch. It can also be overridden when starting the script, for example:
 # UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh
