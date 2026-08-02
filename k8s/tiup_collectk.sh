@@ -15,6 +15,11 @@ end="2026-07-30 11:30:00"
 # Interval in minutes.
 interval=30
 
+# Upload switch. It can also be overridden when starting the script, for example:
+# UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh
+upload_enabled="${UPLOAD_ENABLED:-false}"
+clinic_region="${CLINIC_REGION:-US}"
+
 # Summary file containing each time range, local data directory, and Clinic URL.
 summary_file="./diag_upload_summary_$(date '+%Y%m%d_%H%M%S').txt"
 
@@ -31,6 +36,15 @@ if ! [[ "$interval" =~ ^[1-9][0-9]*$ ]]; then
     echo "ERROR: interval must be a positive integer representing minutes." >&2
     exit 1
 fi
+
+case "$upload_enabled" in
+    true|false)
+        ;;
+    *)
+        echo "ERROR: UPLOAD_ENABLED must be either true or false." >&2
+        exit 1
+        ;;
+esac
 
 begin_epoch=$(date -d "$begin" '+%s' 2>/dev/null) || {
     echo "ERROR: Invalid begin time: $begin" >&2
@@ -49,6 +63,50 @@ fi
 
 interval_seconds=$((interval * 60))
 
+if [[ "$upload_enabled" == "true" ]]; then
+    clinic_token="${CLINIC_TOKEN:-}"
+    configure_clinic_token=false
+
+    if [[ -n "${CLINIC_TOKEN_FILE:-}" ]]; then
+        if [[ ! -e "$CLINIC_TOKEN_FILE" ]]; then
+            echo "WARNING: Clinic token file does not exist: $CLINIC_TOKEN_FILE" >&2
+            echo "WARNING: Assuming the Clinic token is already configured; continuing." >&2
+        elif [[ ! -r "$CLINIC_TOKEN_FILE" ]]; then
+            echo "WARNING: Clinic token file is not readable: $CLINIC_TOKEN_FILE" >&2
+            echo "WARNING: Assuming the Clinic token is already configured; continuing." >&2
+        else
+            clinic_token=$(<"$CLINIC_TOKEN_FILE")
+
+            if [[ -z "$clinic_token" ]]; then
+                echo "WARNING: Clinic token file is empty: $CLINIC_TOKEN_FILE" >&2
+                echo "WARNING: Assuming the Clinic token is already configured; continuing." >&2
+            else
+                configure_clinic_token=true
+            fi
+        fi
+    elif [[ -n "$clinic_token" ]]; then
+        configure_clinic_token=true
+    else
+        echo "WARNING: No Clinic token was provided." >&2
+        echo "WARNING: Assuming the Clinic token is already configured; continuing." >&2
+    fi
+
+    if [[ "$configure_clinic_token" == "true" ]]; then
+        if ! tiup diag config clinic.token "$clinic_token"; then
+            echo "ERROR: Failed to configure the Clinic token." >&2
+            exit 1
+        fi
+    fi
+
+    if ! tiup diag config clinic.region "$clinic_region"; then
+        echo "ERROR: Failed to configure Clinic region: $clinic_region" >&2
+        exit 1
+    fi
+
+    # Do not leave the token in this shell's variables longer than necessary.
+    unset clinic_token configure_clinic_token
+fi
+
 
 ###############################################################################
 # Initialization
@@ -60,6 +118,8 @@ Namespace: $namespace
 Begin:     $begin
 End:       $end
 Interval:  $interval minutes
+Upload:    $upload_enabled
+$([[ "$upload_enabled" == "true" ]] && printf 'Region:    %s\n' "$clinic_region")
 
 EOF
 
@@ -67,6 +127,8 @@ current_epoch=$begin_epoch
 chunk_number=1
 success_count=0
 failure_count=0
+upload_count=0
+upload_skipped_count=0
 
 
 ###############################################################################
@@ -90,8 +152,10 @@ while (( current_epoch < end_epoch )); do
     echo "Time range: $chunk_begin -> $chunk_end"
     echo "======================================================================"
 
-    collect_log=$(mktemp "/tmp/diag_collect_${chunk_number}_XXXXXX.log")
-    upload_log=$(mktemp "/tmp/diag_upload_${chunk_number}_XXXXXX.log")
+    if ! collect_log=$(mktemp "${TMPDIR:-/tmp}/diag_collect_${chunk_number}.XXXXXX"); then
+        echo "ERROR: Could not create a temporary collection log." >&2
+        exit 1
+    fi
 
     echo "Running collectk..."
 
@@ -113,7 +177,6 @@ while (( current_epoch < end_epoch )); do
             echo
         } >> "$summary_file"
 
-        rm -f "$upload_log"
         failure_count=$((failure_count + 1))
         current_epoch=$chunk_end_epoch
         chunk_number=$((chunk_number + 1))
@@ -124,7 +187,7 @@ while (( current_epoch < end_epoch )); do
     # Collected data are stored in /home/.../diag-cluster-xxxxxxxx
     data_dir=$(
         sed -n \
-            's/^Collected data are stored in[[:space:]]\+//p' \
+            's/^Collected data are stored in[[:space:]][[:space:]]*//p' \
             "$collect_log" |
         tail -n 1
     )
@@ -134,7 +197,7 @@ while (( current_epoch < end_epoch )); do
     if [[ -z "$data_dir" ]]; then
         data_dir=$(
             sed -n \
-                's/^These data will be stored in[[:space:]]\+//p' \
+                's/^These data will be stored in[[:space:]][[:space:]]*//p' \
                 "$collect_log" |
             tail -n 1
         )
@@ -150,7 +213,6 @@ while (( current_epoch < end_epoch )); do
             echo
         } >> "$summary_file"
 
-        rm -f "$upload_log"
         failure_count=$((failure_count + 1))
         current_epoch=$chunk_end_epoch
         chunk_number=$((chunk_number + 1))
@@ -168,7 +230,6 @@ while (( current_epoch < end_epoch )); do
             echo
         } >> "$summary_file"
 
-        rm -f "$upload_log"
         failure_count=$((failure_count + 1))
         current_epoch=$chunk_end_epoch
         chunk_number=$((chunk_number + 1))
@@ -177,12 +238,35 @@ while (( current_epoch < end_epoch )); do
 
     echo
     echo "Collected data directory: $data_dir"
+
+    if [[ "$upload_enabled" == "false" ]]; then
+        echo "Upload is disabled; keeping the collected data locally."
+
+        {
+            echo "[$chunk_number] COLLECTED"
+            echo "Time range: $chunk_begin -> $chunk_end"
+            echo "Data directory: $data_dir"
+            echo "Collect log: $collect_log"
+            echo "Upload: skipped (disabled)"
+            echo
+        } >> "$summary_file"
+
+        success_count=$((success_count + 1))
+        upload_skipped_count=$((upload_skipped_count + 1))
+        current_epoch=$chunk_end_epoch
+        chunk_number=$((chunk_number + 1))
+        continue
+    fi
+
+    if ! upload_log=$(mktemp "${TMPDIR:-/tmp}/diag_upload_${chunk_number}.XXXXXX"); then
+        echo "ERROR: Could not create a temporary upload log." >&2
+        exit 1
+    fi
+
     echo "Uploading collected data..."
 
-    tiup diag config clinic.token eyJrIjoiNmZpd3lOQUk0YVZqNjg3UiIsInUiOjUxOCwiaWQiOjEzNzI4MTMwODkxOTU2NTEyODZ9
-    tiup diag config clinic.region US
     echo "Uploading $data_dir..."
-    # tiup diag upload "$data_dir" 2>&1 | tee "$upload_log"
+    tiup diag upload "$data_dir" 2>&1 | tee "$upload_log"
 
     upload_status=${PIPESTATUS[0]}
 
@@ -221,6 +305,7 @@ while (( current_epoch < end_epoch )); do
     } >> "$summary_file"
 
     success_count=$((success_count + 1))
+    upload_count=$((upload_count + 1))
     current_epoch=$chunk_end_epoch
     chunk_number=$((chunk_number + 1))
 done
@@ -235,6 +320,8 @@ echo "======================================================================"
 echo "All requested time ranges have been processed."
 echo "Successful chunks: $success_count"
 echo "Failed chunks:     $failure_count"
+echo "Uploaded chunks:   $upload_count"
+echo "Uploads skipped:   $upload_skipped_count"
 echo "Summary file:      $summary_file"
 echo "======================================================================"
 
