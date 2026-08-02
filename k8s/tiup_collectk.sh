@@ -10,7 +10,7 @@ cluster_name="catalog-dev-eks"
 namespace="catalog-dev"
 
 begin="2026-07-29 11:30:00"
-end="2026-07-29 11:30:00"
+end="2026-07-30 11:30:00"
 
 # Interval in minutes.
 interval=30
@@ -181,7 +181,8 @@ while (( current_epoch < end_epoch )); do
 
     tiup diag config clinic.token eyJrIjoiNmZpd3lOQUk0YVZqNjg3UiIsInUiOjUxOCwiaWQiOjEzNzI4MTMwODkxOTU2NTEyODZ9
     tiup diag config clinic.region US
-    tiup diag upload "$data_dir" 2>&1 | tee "$upload_log"
+    echo "Uploading $data_dir..."
+    # tiup diag upload "$data_dir" 2>&1 | tee "$upload_log"
 
     upload_status=${PIPESTATUS[0]}
 
