@@ -3,7 +3,7 @@
 
 namespace="pingraph-socialgraph-prod"
 begin_time="2026-08-05T00:00:00"
-end_time="2026-08-05-T00:30:00"
+end_time="2026-08-05T00:30:00"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"
