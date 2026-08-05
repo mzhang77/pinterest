@@ -2,10 +2,10 @@
 #!/bin/bash
 set -u
 
-BEGIN_TIME="2026/07/22 13:30:00 +00:00"
-END_TIME="2026/07/22 14:30:00 +00:00"
+BEGIN_TIME="2026/08/05 00:00:00 +00:00"
+END_TIME="2026/08/05 00:30:00 +00:00"
 
-NS="pingraph-shared5-prod"
+NS="pingraph-socialgraph-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/tikv-log-collect"
 LOCAL_OUT_DIR="./tikv_logs_$(date +%Y%m%d_%H%M%S)"
