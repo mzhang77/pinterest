@@ -3,10 +3,10 @@
 
 set -euo pipefail
 
-NS="pingraph-shared5-prod"
+NS="pingraph-socialgraph-prod"
 
-BEGIN_TIME="2026/07/22 13:30:00.000 +00:00"
-END_TIME="2026/07/22 14:30:00.000 +00:00"
+BEGIN_TIME="2026/08/05 00:00:00.000 +00:00"
+END_TIME="2026/08/05 00:30:00.000 +00:00"
 
 OUT_DIR="tidb_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"
