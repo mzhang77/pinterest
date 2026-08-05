@@ -2,8 +2,8 @@
 #!/bin/bash
 set -u
 
-BEGIN_TIME="2026/08/04 13:30:00 +00:00"
-END_TIME="2026/08/04 14:00:00 +00:00"
+BEGIN_TIME="2026/08/05 14:00:00 +00:00"
+END_TIME="2026/08/05 14:30:00 +00:00"
 
 NS="shared3-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
