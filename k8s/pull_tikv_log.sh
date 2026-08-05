@@ -2,8 +2,8 @@
 #!/bin/bash
 set -u
 
-BEGIN_TIME="2026/08/05 00:00:00 +00:00"
-END_TIME="2026/08/05 00:30:00 +00:00"
+BEGIN_TIME="2026/08/05 11:00:00 +00:00"
+END_TIME="2026/08/05 11:30:00 +00:00"
 
 NS="pingraph-socialgraph-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
