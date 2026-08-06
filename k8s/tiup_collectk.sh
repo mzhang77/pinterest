@@ -6,11 +6,11 @@ set -uo pipefail
 # Configuration
 ###############################################################################
 
-cluster_name="pingraph-socialgraph-prod-eks"
-namespace="pingraph-socialgraph-prod"
+cluster_name="shared3-prod-eks"
+namespace="shared3-prod"
 
-begin="2026-08-05 11:00:00"
-end="2026-08-05 11:30:00"
+begin="2026-08-06 13:00:00"
+end="2026-08-06 14:00:00"
 
 # Interval in minutes.
 interval=30
