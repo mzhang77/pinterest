@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-namespace="pingraph-socialgraph-prod"
-begin_time="2026-08-05T11:00:00"
-end_time="2026-08-05T11:30:00"
+namespace="shared3-prod"
+begin_time="2026-08-06T13:00:00"
+end_time="2026-08-06T14:00:00"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"
