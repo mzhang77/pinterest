@@ -17,7 +17,7 @@ interval=30
 
 # Upload switch. It can also be overridden when starting the script, for example:
 # UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh
-upload_enabled="${UPLOAD_ENABLED:-false}"
+upload_enabled="${UPLOAD_ENABLED:-true}"
 clinic_region="${CLINIC_REGION:-US}"
 
 # Summary file containing each time range, local data directory, and Clinic URL.
