@@ -3,10 +3,10 @@
 
 set -euo pipefail
 
-NS="pingraph-socialgraph-prod"
+NS="pikachu-prod"
 
-BEGIN_TIME="2026/08/05 11:00:00.000 +00:00"
-END_TIME="2026/08/05 11:30:00.000 +00:00"
+BEGIN_TIME="2026/08/09 16:00:00.000 +00:00"
+END_TIME="2026/08/09 18:30:00.000 +00:00"
 
 OUT_DIR="pd_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"
