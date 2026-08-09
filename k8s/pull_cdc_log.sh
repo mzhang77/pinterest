@@ -3,14 +3,14 @@
 
 set -u
 
-NS="catalog-dev"
+NS="pikachu-prod"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/ticdc-log-collect"
 LOCAL_OUT_DIR="./ticdc_logs_$(date +%Y%m%d_%H%M%S)"
 
 # UTC time, same format as ticdc log header
-BEGIN_TIME="2026/07/29 15:30:00"
-END_TIME="2026/07/29 22:30:00"
+BEGIN_TIME="2026/08/09 16:00:00"
+END_TIME="2026/08/09 18:30:00"
 
 mkdir -p "$LOCAL_OUT_DIR"
 
