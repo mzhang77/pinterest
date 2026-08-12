@@ -4,8 +4,13 @@ set -u
 
 BEGIN_TIME="2026/08/12 13:30:00 +00:00"
 END_TIME="2026/08/12 14:30:00 +00:00"
+BEGIN_DATE="${BEGIN_TIME%% *}"
+BEGIN_DATE="${BEGIN_DATE//\//-}"
+END_DATE="${END_TIME%% *}"
+END_DATE="${END_DATE//\//-}"
 
 NS="shared3-prod"
+KUBECTL_CONTAINER="tikv"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/tikv-log-collect"
 LOCAL_OUT_DIR="./tikv_logs_$(date +%Y%m%d_%H%M%S)"
@@ -31,7 +36,7 @@ for pod in $pods; do
 
     mkdir -p "$local_pod_dir"
 
-    kubectl exec -n "$NS" "$pod" -- bash -c "
+    kubectl exec -n "$NS" -c "$KUBECTL_CONTAINER" "$pod" -- bash -c "
         rm -rf '${remote_tmp}'
         mkdir -p '${remote_tmp}'
     " || {
@@ -40,7 +45,7 @@ for pod in $pods; do
     }
 
     files=$(
-        kubectl exec -n "$NS" "$pod" -- bash -c "
+        kubectl exec -n "$NS" -c "$KUBECTL_CONTAINER" "$pod" -- bash -c "
             cd '${REMOTE_LOG_DIR}' || exit 1
 
             if [ -f tikv.log ]; then
@@ -49,7 +54,15 @@ for pod in $pods; do
 
             ls -1t tikv*.log 2>/dev/null \
                 | grep -v '^tikv.log$' \
-                | grep -v '^tikv-slow.log$' || true
+                | grep -v '^tikv-slow.log$' \
+                | awk -v begin_date='${BEGIN_DATE}' -v end_date='${END_DATE}' '
+                    /^tikv-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T/ {
+                        file_date = substr(\$0, 6, 10)
+                        if (file_date >= begin_date && file_date <= end_date) {
+                            print
+                        }
+                    }
+                ' || true
         " | sed '/^Defaulted container /d'
     )
 
@@ -58,11 +71,11 @@ for pod in $pods; do
 
         remote_gz="${remote_tmp}/${f}.filtered.gz"
 
-        kubectl exec -n "$NS" "$pod" -- bash -c "
+        kubectl exec -n "$NS" -c "$KUBECTL_CONTAINER" "$pod" -- bash -c "
             cd '${REMOTE_LOG_DIR}' &&
             awk -v begin='${BEGIN_TIME}' -v end='${END_TIME}' '
                 match(\$0, /\"time\":\"[^\"]+\"/) {
-                    t = substr(\$0, RSTART + 8, RLENGTH - 8)
+                    t = substr(\$0, RSTART + 8, RLENGTH - 9)
                     if (t >= begin && t <= end) {
                         print
                     }
@@ -79,6 +92,7 @@ for pod in $pods; do
 
         kubectl cp \
             -n "$NS" \
+            -c "$KUBECTL_CONTAINER" \
             "${pod}:${remote_gz}" \
             "${local_pod_dir}/${f}.filtered.gz"
 
@@ -88,10 +102,10 @@ for pod in $pods; do
             continue
         fi
 
-        kubectl exec -n "$NS" "$pod" -- rm -f "${remote_gz}" >/dev/null 2>&1 || true
+        kubectl exec -n "$NS" -c "$KUBECTL_CONTAINER" "$pod" -- rm -f "${remote_gz}" >/dev/null 2>&1 || true
     done
 
-    kubectl exec -n "$NS" "$pod" -- rm -rf "$remote_tmp" >/dev/null 2>&1 || true
+    kubectl exec -n "$NS" -c "$KUBECTL_CONTAINER" "$pod" -- rm -rf "$remote_tmp" >/dev/null 2>&1 || true
 
     echo "Done: $pod"
     echo
