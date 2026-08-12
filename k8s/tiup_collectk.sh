@@ -6,11 +6,11 @@ set -uo pipefail
 # Configuration
 ###############################################################################
 
-cluster_name="pikachu-prod-eks"
-namespace="pikachu-prod"
+cluster_name="shared3-prod-eks"
+namespace="shared3-prod"
 
-begin="2026-08-09 16:00:00"
-end="2026-08-09 18:30:00"
+begin="2026-08-12 13:30:00"
+end="2026-08-12 14:30:00"
 
 # Interval in minutes.
 interval=30
