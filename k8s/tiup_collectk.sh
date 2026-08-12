@@ -9,11 +9,11 @@ set -uo pipefail
 cluster_name="shared3-prod-eks"
 namespace="shared3-prod"
 
-begin="2026-08-12 13:30:00"
-end="2026-08-12 14:30:00"
+begin="2026-08-12 13:40:00"
+end="2026-08-12 14:00:00"
 
 # Interval in minutes.
-interval=30
+interval=10
 
 # Upload switch. It can also be overridden when starting the script, for example:
 # UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh
