@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-cluster_name="pingraph-socialgraph-prod"
-begin="2026-07-31 16:00:00"
-end="2026-07-31 16:30:00"
+cluster_name="bulbasaur-prod"
+begin="2026-08-13 04:30:00"
+end="2026-08-13 05:00:00"
 interval=10
 
 current="$begin"
