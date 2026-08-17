@@ -3,8 +3,8 @@ set -u
 
 # ===== User variables =====
 CLUSTER="bulbasaur-prod"
-BEGIN_TIME="2026/06/26 13:00:00"
-END_TIME="2026/06/26 14:00:00"
+BEGIN_TIME="2026/08/13 04:00:00"
+END_TIME="2026/08/13 07:00:00"
 
 # TiCDC log directory on ticdc nodes
 LOG_DIR="/var/log/tidb"
