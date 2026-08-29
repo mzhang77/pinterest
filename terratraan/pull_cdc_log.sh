@@ -3,8 +3,8 @@ set -u
 
 # ===== User variables =====
 CLUSTER="pingraph-notifications-prod"
-BEGIN_TIME="2026/08/28 19:45:00"
-END_TIME="2026/08/28 20:15:00"
+BEGIN_TIME="2026/08/26 18:30:00"
+END_TIME="2026/08/27 02:15:00"
 
 # TiCDC log directory on ticdc nodes
 LOG_DIR="/var/log/tidb"
