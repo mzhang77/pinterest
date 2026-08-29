@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-cluster_name="bulbasaur-prod"
-begin="2026-08-15 22:45:00"
-end="2026-08-15 23:15:00"
+cluster_name="pingraph-notifications-prod"
+begin="2026-08-28 19:45:00"
+end="2026-08-28 20:15:00"
 interval=10
 
 current="$begin"
