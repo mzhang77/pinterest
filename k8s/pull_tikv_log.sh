@@ -2,14 +2,17 @@
 #!/bin/bash
 set -u
 
+
+NS="shopads-index-prod"
 BEGIN_TIME="2026/09/08 06:30:00 +00:00"
 END_TIME="2026/09/08 09:00:00 +00:00"
+
+
 BEGIN_DATE="${BEGIN_TIME%% *}"
 BEGIN_DATE="${BEGIN_DATE//\//-}"
 END_DATE="${END_TIME%% *}"
 END_DATE="${END_DATE//\//-}"
 
-NS="shopads-index-prod"
 KUBECTL_CONTAINER="tikv"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/tikv-log-collect"
