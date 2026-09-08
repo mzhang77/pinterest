@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-NS="shared3-prod"
+NS="shopads-index-prod"
 
 BEGIN_TIME="2026/09/08 06:30:00.000 +00:00"
 END_TIME="2026/09/08 09:00:00.000 +00:00"
