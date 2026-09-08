@@ -1,9 +1,12 @@
 
 #!/bin/sh
 
-namespace="shopads-index-prod"
-begin_time="2026-09-08T06:30:00"
-end_time="2026-09-08T09:00:00"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+namespace="$NAMESPACE"
+begin_time="$BEGIN_TIME_ISO"
+end_time="$END_TIME_ISO"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"

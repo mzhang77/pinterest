@@ -3,7 +3,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
 curl -sS -X GET \
-    "http://localhost:4917/api/v1/collectors" \
+    "${DIAG_BASE_URL}/api/v1/collectors" \
     -H "accept: application/json" \
     | jq 'sort_by(.date)'

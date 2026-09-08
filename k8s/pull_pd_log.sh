@@ -3,10 +3,12 @@
 
 set -euo pipefail
 
-NS="pikachu-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
 
-BEGIN_TIME="2026/08/09 16:00:00.000 +00:00"
-END_TIME="2026/08/09 18:30:00.000 +00:00"
+NS="$NAMESPACE"
+BEGIN_TIME="$BEGIN_TIME_SLASH_MILLIS_TZ"
+END_TIME="$END_TIME_SLASH_MILLIS_TZ"
 
 OUT_DIR="pd_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"
@@ -58,4 +60,3 @@ done
 
 echo
 echo "Done."
-

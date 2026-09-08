@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="http://localhost:4917"
-CLUSTER_NAME="shopads-index-prod-eks"
-NAMESPACE="shopads-index-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
 
-START="2026-09-08 06:30:00"
-END="2026-09-08 09:00:00"
-STEP_MINUTES=30
+BASE_URL="$DIAG_BASE_URL"
+START="$BEGIN_TIME_COLLECT"
+END="$END_TIME_COLLECT"
 
 current="$START"
 
