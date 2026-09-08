@@ -12,7 +12,7 @@ current="$START"
 
 while [[ "$current" < "$END" ]]; do
   ts=$(date -d "$current" +%s)
-  next=$(date -d "@$((ts + STEP_MINUTES * 60))" "+%Y-%m-%d %H:%M:%S")
+  next=$(date -d "@$((ts + INTERVAL_MINUTES * 60))" "+%Y-%m-%d %H:%M:%S")
 
   echo "Collecting from $current to $next"
 

@@ -16,7 +16,7 @@ begin="$BEGIN_TIME_COLLECT"
 end="$END_TIME_COLLECT"
 
 # Interval in minutes.
-interval="$COLLECT_INTERVAL_MINUTES"
+interval="$INTERVAL_MINUTES"
 
 # Upload switch. It can also be overridden when starting the script, for example:
 # UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh
