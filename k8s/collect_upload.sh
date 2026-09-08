@@ -2,12 +2,12 @@
 set -euo pipefail
 
 BASE_URL="http://localhost:4917"
-CLUSTER_NAME="pingraph-socialgraph-prod-eks"
-NAMESPACE="pingraph-socialgraph-prod"
+CLUSTER_NAME="shopads-index-prod-eks"
+NAMESPACE="shopads-index-prod"
 
-START="2026-07-31 16:00:00"
-END="2026-07-31 16:30:00"
-STEP_MINUTES=10
+START="2026-09-08 06:30:00"
+END="2026-09-08 09:00:00"
+STEP_MINUTES=30
 
 current="$START"
 
