@@ -2,22 +2,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
 LOCAL_PORT="14000"
 REMOTE_PORT="4000"
 OUT_FILE="pf14000.out"
 PID_FILE=".pf14000.pid"
 
 get_namespace() {
-    ns="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
-    if [[ -z "$ns" ]]; then
-        ns="default"
-    fi
-    echo "$ns"
+    echo "$NAMESPACE"
 }
 
 get_service_name() {
-    ns="$(get_namespace)"
-    echo "${ns}-eks-tidb"
+    echo "${CLUSTER_NAME}-tidb"
 }
 
 usage() {
@@ -27,12 +25,12 @@ usage() {
 start() {
     SVC="$(get_service_name)"
 
-    if ! kubectl get svc "$SVC" >/dev/null 2>&1; then
+    if ! kubectl get svc -n "$NAMESPACE" "$SVC" >/dev/null 2>&1; then
         echo "Service not found: $SVC"
         echo "Current namespace: $(get_namespace)"
         echo
         echo "Available tidb services:"
-        kubectl get svc | grep -- '-tidb' || true
+        kubectl get svc -n "$NAMESPACE" | grep -- '-tidb' || true
         return 1
     fi
 
@@ -44,7 +42,7 @@ start() {
     echo "Current namespace: $(get_namespace)"
     echo "Starting port-forward: localhost:${LOCAL_PORT} -> svc/${SVC}:${REMOTE_PORT}"
 
-    nohup kubectl port-forward "svc/${SVC}" "${LOCAL_PORT}:${REMOTE_PORT}" > "$OUT_FILE" 2>&1 &
+    nohup kubectl port-forward -n "$NAMESPACE" "svc/${SVC}" "${LOCAL_PORT}:${REMOTE_PORT}" > "$OUT_FILE" 2>&1 &
     echo $! > "$PID_FILE"
 
     sleep 1
@@ -73,7 +71,7 @@ stop() {
 
     echo "No PID file or process not running. Trying to find matching kubectl port-forward process..."
 
-    pids=$(pgrep -f "kubectl port-forward svc/${SVC} ${LOCAL_PORT}:${REMOTE_PORT}" || true)
+    pids=$(pgrep -f "kubectl port-forward -n ${NAMESPACE} svc/${SVC} ${LOCAL_PORT}:${REMOTE_PORT}" || true)
 
     if [[ -z "$pids" ]]; then
         echo "No matching port-forward process found."
@@ -96,7 +94,7 @@ status() {
         return 0
     fi
 
-    pids=$(pgrep -f "kubectl port-forward svc/${SVC} ${LOCAL_PORT}:${REMOTE_PORT}" || true)
+    pids=$(pgrep -f "kubectl port-forward -n ${NAMESPACE} svc/${SVC} ${LOCAL_PORT}:${REMOTE_PORT}" || true)
 
     if [[ -n "$pids" ]]; then
         echo "Running, but PID file is missing or stale."

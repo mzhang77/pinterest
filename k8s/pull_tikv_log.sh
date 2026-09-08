@@ -2,10 +2,12 @@
 #!/bin/bash
 set -u
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
 
-NS="shopads-index-prod"
-BEGIN_TIME="2026/09/08 06:30:00 +00:00"
-END_TIME="2026/09/08 09:00:00 +00:00"
+NS="$NAMESPACE"
+BEGIN_TIME="$BEGIN_TIME_SLASH_TZ"
+END_TIME="$END_TIME_SLASH_TZ"
 
 
 BEGIN_DATE="${BEGIN_TIME%% *}"

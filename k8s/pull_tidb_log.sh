@@ -3,10 +3,12 @@
 
 set -euo pipefail
 
-NS="shopads-index-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
 
-BEGIN_TIME="2026/09/08 06:30:00.000 +00:00"
-END_TIME="2026/09/08 09:00:00.000 +00:00"
+NS="$NAMESPACE"
+BEGIN_TIME="$BEGIN_TIME_SLASH_MILLIS_TZ"
+END_TIME="$END_TIME_SLASH_MILLIS_TZ"
 
 OUT_DIR="tidb_logs_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$OUT_DIR"

@@ -6,14 +6,17 @@ set -uo pipefail
 # Configuration
 ###############################################################################
 
-cluster_name="shared3-prod-eks"
-namespace="shared3-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
 
-begin="2026-08-12 13:40:00"
-end="2026-08-12 14:00:00"
+cluster_name="$CLUSTER_NAME"
+namespace="$NAMESPACE"
+
+begin="$BEGIN_TIME_COLLECT"
+end="$END_TIME_COLLECT"
 
 # Interval in minutes.
-interval=20
+interval="$COLLECT_INTERVAL_MINUTES"
 
 # Upload switch. It can also be overridden when starting the script, for example:
 # UPLOAD_ENABLED=true CLINIC_TOKEN_FILE=/path/to/token ./tiup_collectk.sh

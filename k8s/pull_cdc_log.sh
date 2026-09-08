@@ -3,14 +3,17 @@
 
 set -u
 
-NS="pikachu-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+NS="$NAMESPACE"
 REMOTE_LOG_DIR="/var/log/tidb"
 REMOTE_TMP_BASE="/tmp/ticdc-log-collect"
 LOCAL_OUT_DIR="./ticdc_logs_$(date +%Y%m%d_%H%M%S)"
 
 # UTC time, same format as ticdc log header
-BEGIN_TIME="2026/08/09 16:00:00"
-END_TIME="2026/08/09 18:30:00"
+BEGIN_TIME="$BEGIN_TIME_SLASH"
+END_TIME="$END_TIME_SLASH"
 
 mkdir -p "$LOCAL_OUT_DIR"
 

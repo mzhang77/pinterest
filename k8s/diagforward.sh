@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE="tidb-admin"
-SVC="diag"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+NAMESPACE="$DIAG_NAMESPACE"
+SVC="$DIAG_SERVICE"
 LOCAL_PORT="4917"
 REMOTE_PORT="4917"
 OUT_FILE="diagforward.out"
