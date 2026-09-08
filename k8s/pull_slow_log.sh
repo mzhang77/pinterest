@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-namespace="shared3-prod"
-begin_time="2026-08-06T13:00:00"
-end_time="2026-08-06T14:00:00"
+namespace="shopads-index-prod"
+begin_time="2026-09-08T06:30:00"
+end_time="2026-09-08T09:00:00"
 
 out="slowlog_${namespace}_${begin_time}_${end_time}.log"
 : > "$out"
