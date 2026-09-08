@@ -13,7 +13,7 @@
 : "${END_TIME:=2026-09-08 09:00:00}"
 : "${TIMEZONE_OFFSET:=+00:00}"
 
-: "${STEP_MINUTES:=30}"
+: "${STEP_MINUTES:=10}"
 : "${COLLECT_INTERVAL_MINUTES:=20}"
 : "${DIAG_BASE_URL:=http://localhost:4917}"
 : "${DIAG_NAMESPACE:=tidb-admin}"
