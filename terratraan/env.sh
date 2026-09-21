@@ -2,32 +2,41 @@
 
 # Common environment for the terratraan helper scripts.
 # Override any value before running a script, for example:
-#   CDC_CLUSTER=foo-prod CDC_BEGIN_TIME="2026/09/03 17:50:00" ./pull_cdc_log.sh
+#   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
-: "${CDC_CLUSTER:=pingraph-notifications-prod}"
-: "${CDC_BEGIN_TIME:=2026/09/03 17:50:00}"
-: "${CDC_END_TIME:=2026/09/03 19:15:00}"
-: "${CDC_LOG_DIR:=/var/log/tidb}"
-: "${CDC_DEBUG:=1}"
+: "${CLUSTER_NAME:=pingraph-notifications-prod}"
+: "${BEGIN_TIME:=2026-09-03 17:50:00}"
+: "${END_TIME:=2026-09-03 19:15:00}"
+: "${LOG_DIR:=/var/log/tidb}"
+: "${DEBUG:=1}"
+: "${INTERVAL_MINUTES:=10}"
 
-: "${PD_CLUSTER:=ads-index-staging-prod}"
-: "${PD_BEGIN_TIME:=2026/06/25 16:30:00}"
-: "${PD_END_TIME:=2026/06/25 18:00:00}"
-: "${PD_LOG_DIR:=/var/log/tidb}"
+_terratraan_date_slash() {
+    printf '%s\n' "$1" | tr 'T' ' ' | awk '{print $1}' | tr '-' '/'
+}
 
-: "${SLOW_CLUSTER:=bulbasaur-prod}"
-: "${SLOW_BEGIN_TIME:=2026-06-26T08:00:00Z}"
-: "${SLOW_END_TIME:=2026-06-26T08:30:00Z}"
-: "${SLOW_LOG_DIR:=/var/log/tidb}"
-: "${SLOW_DEBUG:=1}"
+_terratraan_date_hyphen() {
+    printf '%s\n' "$1" | tr 'T' ' ' | awk '{print $1}' | tr '/' '-'
+}
 
-: "${TIDB_CLUSTER:=ads-index-staging-prod}"
-: "${TIDB_BEGIN_TIME:=2026/06/25 02:30:00}"
-: "${TIDB_END_TIME:=2026/06/25 03:00:00}"
-: "${TIDB_LOG_FILE:=/var/log/tidb/tidb.log}"
+_terratraan_clock() {
+    printf '%s\n' "$1" | tr 'T' ' ' | awk '{print $2}' | sed 's/Z$//' | sed 's/+00:00$//' | sed 's/\.[0-9][0-9]*$//'
+}
 
-: "${CLINIC_CLUSTER:=pingraph-notifications-prod}"
-: "${CLINIC_BEGIN_TIME:=2026-08-28 19:45:00}"
-: "${CLINIC_END_TIME:=2026-08-28 20:15:00}"
-: "${CLINIC_INTERVAL_MINUTES:=10}"
+_terratraan_begin_date="$(_terratraan_date_slash "$BEGIN_TIME")"
+_terratraan_end_date="$(_terratraan_date_slash "$END_TIME")"
+_terratraan_begin_date_hyphen="$(_terratraan_date_hyphen "$BEGIN_TIME")"
+_terratraan_end_date_hyphen="$(_terratraan_date_hyphen "$END_TIME")"
+_terratraan_begin_clock="$(_terratraan_clock "$BEGIN_TIME")"
+_terratraan_end_clock="$(_terratraan_clock "$END_TIME")"
+
+: "${BEGIN_TIME_SLASH:=${_terratraan_begin_date} ${_terratraan_begin_clock}}"
+: "${END_TIME_SLASH:=${_terratraan_end_date} ${_terratraan_end_clock}}"
+: "${BEGIN_TIME_ISO:=${_terratraan_begin_date_hyphen}T${_terratraan_begin_clock}Z}"
+: "${END_TIME_ISO:=${_terratraan_end_date_hyphen}T${_terratraan_end_clock}Z}"
+
+unset _terratraan_begin_date _terratraan_end_date
+unset _terratraan_begin_date_hyphen _terratraan_end_date_hyphen
+unset _terratraan_begin_clock _terratraan_end_clock
+
 : "${TIUP_METRICS_SCRIPT:=${SCRIPT_DIR}/tiup_metrics.sh}"

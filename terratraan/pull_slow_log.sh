@@ -5,20 +5,16 @@ set -u
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 . "${SCRIPT_DIR}/env.sh"
 
-CLUSTER="$SLOW_CLUSTER"
+CLUSTER="$CLUSTER_NAME"
 
 # UTC time range.
 # Format must be: YYYY-MM-DDTHH:MM:SSZ
-BEGIN_TIME="$SLOW_BEGIN_TIME"
-END_TIME="$SLOW_END_TIME"
+BEGIN_TIME="$BEGIN_TIME_ISO"
+END_TIME="$END_TIME_ISO"
 
 # Slow log location on TiDB SQL nodes.
-LOG_DIR="$SLOW_LOG_DIR"
-
 # Set to 1 to print remote file-selection details to stderr.
 # This does not pollute the gzip output.
-DEBUG="$SLOW_DEBUG"
-
 # Local output directory
 OUT_DIR="./tidb_slow_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
 

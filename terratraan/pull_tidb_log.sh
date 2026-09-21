@@ -5,12 +5,12 @@ set -u
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 . "${SCRIPT_DIR}/env.sh"
 
-CLUSTER="$TIDB_CLUSTER"
-BEGIN_TIME="$TIDB_BEGIN_TIME"
-END_TIME="$TIDB_END_TIME"
+CLUSTER="$CLUSTER_NAME"
+BEGIN_TIME="$BEGIN_TIME_SLASH"
+END_TIME="$END_TIME_SLASH"
 
 # TiDB SQL log path on sql nodes
-LOG_FILE="$TIDB_LOG_FILE"
+LOG_FILE="${LOG_DIR}/tidb.log"
 
 # Local output directory
 OUT_DIR="./tidb_sql_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
