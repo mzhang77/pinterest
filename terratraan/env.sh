@@ -4,12 +4,12 @@
 # Override any value before running a script, for example:
 #   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
-: "${CLUSTER_NAME:=pingraph-notifications-prod}"
-: "${BEGIN_TIME:=2026-09-03 17:50:00}"
-: "${END_TIME:=2026-09-03 19:15:00}"
+: "${CLUSTER_NAME:=pingraph-richpins-prod}"
+: "${BEGIN_TIME:=2026-09-21 14:15:00}"
+: "${END_TIME:=2026-09-21 15:15:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
-: "${INTERVAL_MINUTES:=10}"
+: "${INTERVAL_MINUTES:=20}"
 
 _terratraan_date_slash() {
     printf '%s\n' "$1" | tr 'T' ' ' | awk '{print $1}' | tr '-' '/'
