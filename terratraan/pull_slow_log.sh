@@ -2,20 +2,22 @@
 #!/usr/bin/env bash
 set -u
 
-# ===== User variables =====
-CLUSTER="bulbasaur-prod"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+CLUSTER="$SLOW_CLUSTER"
 
 # UTC time range.
 # Format must be: YYYY-MM-DDTHH:MM:SSZ
-BEGIN_TIME="2026-06-26T08:00:00Z"
-END_TIME="2026-06-26T08:30:00Z"
+BEGIN_TIME="$SLOW_BEGIN_TIME"
+END_TIME="$SLOW_END_TIME"
 
 # Slow log location on TiDB SQL nodes.
-LOG_DIR="/var/log/tidb"
+LOG_DIR="$SLOW_LOG_DIR"
 
 # Set to 1 to print remote file-selection details to stderr.
 # This does not pollute the gzip output.
-DEBUG=1
+DEBUG="$SLOW_DEBUG"
 
 # Local output directory
 OUT_DIR="./tidb_slow_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"

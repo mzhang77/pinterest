@@ -2,13 +2,15 @@
 #!/usr/bin/env bash
 set -u
 
-# ===== User variables =====
-CLUSTER="ads-index-staging-prod"
-BEGIN_TIME="2026/06/25 16:30:00"
-END_TIME="2026/06/25 18:00:00"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+CLUSTER="$PD_CLUSTER"
+BEGIN_TIME="$PD_BEGIN_TIME"
+END_TIME="$PD_END_TIME"
 
 # PD log directory on pd nodes
-LOG_DIR="/var/log/tidb"
+LOG_DIR="$PD_LOG_DIR"
 
 # Local output directory
 OUT_DIR="./pd_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
