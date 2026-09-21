@@ -5,10 +5,10 @@ set -euo pipefail
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 . "${SCRIPT_DIR}/env.sh"
 
-cluster_name="$CLINIC_CLUSTER"
-begin="$CLINIC_BEGIN_TIME"
-end="$CLINIC_END_TIME"
-interval="$CLINIC_INTERVAL_MINUTES"
+cluster_name="$CLUSTER_NAME"
+begin="$BEGIN_TIME"
+end="$END_TIME"
+interval="$INTERVAL_MINUTES"
 
 current="$begin"
 

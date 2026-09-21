@@ -5,13 +5,11 @@ set -u
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 . "${SCRIPT_DIR}/env.sh"
 
-CLUSTER="$PD_CLUSTER"
-BEGIN_TIME="$PD_BEGIN_TIME"
-END_TIME="$PD_END_TIME"
+CLUSTER="$CLUSTER_NAME"
+BEGIN_TIME="$BEGIN_TIME_SLASH"
+END_TIME="$END_TIME_SLASH"
 
 # PD log directory on pd nodes
-LOG_DIR="$PD_LOG_DIR"
-
 # Local output directory
 OUT_DIR="./pd_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
 

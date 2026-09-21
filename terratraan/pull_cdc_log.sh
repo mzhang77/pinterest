@@ -4,17 +4,13 @@ set -u
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 . "${SCRIPT_DIR}/env.sh"
 
-CLUSTER="$CDC_CLUSTER"
-BEGIN_TIME="$CDC_BEGIN_TIME"
-END_TIME="$CDC_END_TIME"
+CLUSTER="$CLUSTER_NAME"
+BEGIN_TIME="$BEGIN_TIME_SLASH"
+END_TIME="$END_TIME_SLASH"
 
 # TiCDC log directory on ticdc nodes
-LOG_DIR="$CDC_LOG_DIR"
-
 # Set to 1 to print remote file-selection details to stderr.
 # This does not pollute the gzip output.
-DEBUG="$CDC_DEBUG"
-
 # Local output directory
 OUT_DIR="./ticdc_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
 
