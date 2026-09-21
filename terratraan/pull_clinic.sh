@@ -2,10 +2,13 @@
 
 set -euo pipefail
 
-cluster_name="pingraph-notifications-prod"
-begin="2026-08-28 19:45:00"
-end="2026-08-28 20:15:00"
-interval=10
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+cluster_name="$CLINIC_CLUSTER"
+begin="$CLINIC_BEGIN_TIME"
+end="$CLINIC_END_TIME"
+interval="$CLINIC_INTERVAL_MINUTES"
 
 current="$begin"
 
@@ -33,7 +36,7 @@ PY
 
     echo "Running: $cluster_name, $current -> $next"
 
-    tiup_metrics.sh "$cluster_name" "$current" "$next"
+    "$TIUP_METRICS_SCRIPT" "$cluster_name" "$current" "$next"
 
     current="$next"
 done

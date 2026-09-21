@@ -1,6 +1,9 @@
 
 #!/bin/bash
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
 usage() {
     cat <<EOF
 Usage: $(basename "$0") <cluster> [from] [to] [prom|vm|k8s]

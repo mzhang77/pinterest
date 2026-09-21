@@ -5,6 +5,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
 usage() {
   echo "Usage:"
   echo "  $(basename "$0") <host> <remote-path> [local-directory]"
@@ -51,4 +54,3 @@ gironde ssh -T "$HOST" \
 echo
 echo "Copy completed:"
 echo "  $LOCAL_DIR/$REMOTE_NAME"
-

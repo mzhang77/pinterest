@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 set -u
 
-# ===== User variables =====
-CLUSTER="pingraph-notifications-prod"
-BEGIN_TIME="2026/09/03 17:50:00"
-END_TIME="2026/09/03 19:15:00"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+CLUSTER="$CDC_CLUSTER"
+BEGIN_TIME="$CDC_BEGIN_TIME"
+END_TIME="$CDC_END_TIME"
 
 # TiCDC log directory on ticdc nodes
-LOG_DIR="/var/log/tidb"
+LOG_DIR="$CDC_LOG_DIR"
 
 # Set to 1 to print remote file-selection details to stderr.
 # This does not pollute the gzip output.
-DEBUG=1
+DEBUG="$CDC_DEBUG"
 
 # Local output directory
 OUT_DIR="./ticdc_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"

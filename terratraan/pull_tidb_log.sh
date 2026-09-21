@@ -2,13 +2,15 @@
 #!/usr/bin/env bash
 set -u
 
-# ===== User variables =====
-CLUSTER="ads-index-staging-prod"
-BEGIN_TIME="2026/06/25 02:30:00"
-END_TIME="2026/06/25 03:00:00"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "${SCRIPT_DIR}/env.sh"
+
+CLUSTER="$TIDB_CLUSTER"
+BEGIN_TIME="$TIDB_BEGIN_TIME"
+END_TIME="$TIDB_END_TIME"
 
 # TiDB SQL log path on sql nodes
-LOG_FILE="/var/log/tidb/tidb.log"
+LOG_FILE="$TIDB_LOG_FILE"
 
 # Local output directory
 OUT_DIR="./tidb_sql_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
