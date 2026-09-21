@@ -25,6 +25,18 @@ quote() {
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
 
+# Rotated PD files use timestamps such as:
+#   pd-2026-09-21T13-08-55.504.log
+# Keep the same timestamp shape for cheap filename-based selection remotely.
+BEGIN_FILE_TIME="${BEGIN_TIME_SLASH//\//-}"
+BEGIN_FILE_TIME="${BEGIN_FILE_TIME// /T}"
+BEGIN_FILE_TIME="${BEGIN_FILE_TIME//:/-}"
+END_FILE_TIME="${END_TIME_SLASH//\//-}"
+END_FILE_TIME="${END_FILE_TIME// /T}"
+END_FILE_TIME="${END_FILE_TIME//:/-}"
+REMOTE_BEGIN_FILE_TIME="$(quote "$BEGIN_FILE_TIME")"
+REMOTE_END_FILE_TIME="$(quote "$END_FILE_TIME")"
+
 mkdir -p "$OUT_DIR"
 
 echo "Cluster:     ${CLUSTER}"
@@ -88,12 +100,32 @@ while read -r NAME IP; do
   # /var/log/tidb/pd.log
   # /var/log/tidb/pd-2026-06-17T21-43-02.904.log
   #
-  # We scan all pd*.log files under LOG_DIR.
+  # Select files by rotation timestamp before reading any log content. Keep
+  # the newest rotated file before BEGIN_TIME because it may cross the start
+  # boundary, plus files through END_TIME. Always keep the current pd.log.
   gironde ssh "$NAME" "
     set -o pipefail
 
-    find '$LOG_DIR' -maxdepth 1 -type f -name 'pd*.log' -print0 |
-    while IFS= read -r -d '' f; do
+    find '$LOG_DIR' -maxdepth 1 -type f \( -name 'pd.log' -o -name 'pd-*.log' \) -printf '%f\\n' 2>/dev/null |
+    sort |
+    awk -v begin=${REMOTE_BEGIN_FILE_TIME} -v end=${REMOTE_END_FILE_TIME} '
+      \$0 == "pd.log" { print; next }
+      \$0 !~ /^pd-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\.[0-9][0-9][0-9]\\.log$/ { next }
+      {
+        ts = substr(\$0, 4, 19)
+        if (ts < begin) {
+          previous = \$0
+        } else if (ts <= end) {
+          print
+        }
+      }
+      END {
+        if (previous != "") print previous
+      }
+    ' |
+    while IFS= read -r file; do
+      [[ -z "\$file" ]] && continue
+      f='$LOG_DIR/\$file'
       sudo -n awk -v begin=${REMOTE_BEGIN_TIME} -v end=${REMOTE_END_TIME} -v file=\"\$f\" '
         match(\$0, /\"time\":\"([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
           t = m[1]
