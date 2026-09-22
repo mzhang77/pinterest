@@ -5,8 +5,8 @@
 #   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
 : "${CLUSTER_NAME:=pingraph-richpins-prod}"
-: "${BEGIN_TIME:=2026-09-21 22:00:00}"
-: "${END_TIME:=2026-09-22 05:00:00}"
+: "${BEGIN_TIME:=2026-09-22 01:30:00}"
+: "${END_TIME:=2026-09-22 02:30:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
 : "${INTERVAL_MINUTES:=20}"
