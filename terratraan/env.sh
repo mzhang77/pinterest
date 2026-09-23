@@ -10,6 +10,8 @@
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
 : "${INTERVAL_MINUTES:=20}"
+# Optional awk regular expression. Matching CDC log lines are excluded from output.
+: "${CDC_LOG_FILTER_PATTERN:=scan window local advance due to pending barrier}"
 
 _terratraan_date_slash() {
     printf '%s\n' "$1" | tr 'T' ' ' | awk '{print $1}' | tr '-' '/'
