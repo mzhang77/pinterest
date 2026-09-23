@@ -7,7 +7,7 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 CLUSTER="$CLUSTER_NAME"
 BEGIN_TIME="$BEGIN_TIME_SLASH"
 END_TIME="$END_TIME_SLASH"
-CDC_FILTER_PATTERN="scan window local advance due to pending barrier"
+CDC_FILTER_PATTERN="$CDC_LOG_FILTER_PATTERN"
 
 # TiCDC log directory on ticdc nodes
 # Set to 1 to print remote file-selection details to stderr.
