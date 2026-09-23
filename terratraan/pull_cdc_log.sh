@@ -7,6 +7,7 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 CLUSTER="$CLUSTER_NAME"
 BEGIN_TIME="$BEGIN_TIME_SLASH"
 END_TIME="$END_TIME_SLASH"
+CDC_FILTER_PATTERN="scan window local advance due to pending barrier"
 
 # TiCDC log directory on ticdc nodes
 # Set to 1 to print remote file-selection details to stderr.
@@ -26,11 +27,13 @@ quote() {
 REMOTE_LOG_DIR="$(quote "$LOG_DIR")"
 REMOTE_BEGIN_TIME="$(quote "$BEGIN_TIME")"
 REMOTE_END_TIME="$(quote "$END_TIME")"
+REMOTE_CDC_FILTER_PATTERN="$(quote "$CDC_FILTER_PATTERN")"
 
 REMOTE_SCRIPT='log_dir="$1"
 begin="$2"
 end="$3"
 debug="$4"
+filter_pattern="$5"
 
 cd "$log_dir" || exit 10
 
@@ -100,10 +103,10 @@ fi
 
 tmp_out="/tmp/ticdc_filtered_$$.log"
 
-awk -v begin="$begin_cmp" -v end="$end_cmp" '\''
+awk -v begin="$begin_cmp" -v end="$end_cmp" -v filter_pattern="$filter_pattern" '\''
   match($0, /^\[([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
     t = m[1]
-    if (t >= begin && t <= end) {
+    if (t >= begin && t <= end && (filter_pattern == "" || $0 !~ filter_pattern)) {
       print $0
     }
   }
@@ -125,6 +128,7 @@ SUMMARY_FILE="${OUT_DIR}/collection_summary.txt"
   echo "begin_time=${BEGIN_TIME}"
   echo "end_time=${END_TIME}"
   echo "remote_log_dir=${LOG_DIR}"
+  echo "cdc_filter_pattern=${CDC_FILTER_PATTERN}"
   echo "output_dir=${OUT_DIR}"
   echo
 } > "$SUMMARY_FILE"
@@ -134,6 +138,7 @@ echo "Begin time:  ${BEGIN_TIME}"
 echo "End time:    ${END_TIME}"
 echo "Remote dir:  ${LOG_DIR}"
 echo "Debug:       ${DEBUG}"
+echo "CDC filter:  ${CDC_FILTER_PATTERN:-<none>}"
 echo "Output dir:  ${OUT_DIR}"
 echo
 
@@ -181,7 +186,7 @@ while read -r NAME IP; do
   echo "============================================================"
 
   printf '%s\n' "$REMOTE_SCRIPT" \
-    | gironde ssh "$NAME" "sudo -n bash -s -- ${REMOTE_LOG_DIR} ${REMOTE_BEGIN_TIME} ${REMOTE_END_TIME} ${DEBUG}" \
+    | gironde ssh "$NAME" "sudo -n bash -s -- ${REMOTE_LOG_DIR} ${REMOTE_BEGIN_TIME} ${REMOTE_END_TIME} ${DEBUG} ${REMOTE_CDC_FILTER_PATTERN}" \
     > "$OUT_FILE"
 
   rc=$?
