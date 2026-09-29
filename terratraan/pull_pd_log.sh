@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -u
 
@@ -109,7 +108,7 @@ while read -r NAME IP; do
     find '$LOG_DIR' -maxdepth 1 -type f \( -name 'pd.log' -o -name 'pd-*.log' \) -printf '%f\\n' 2>/dev/null |
     sort |
     awk -v begin=${REMOTE_BEGIN_FILE_TIME} -v end=${REMOTE_END_FILE_TIME} '
-      \$0 == "pd.log" { print; next }
+      \$0 == \"pd.log\" { print; next }
       \$0 !~ /^pd-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\.[0-9][0-9][0-9]\\.log$/ { next }
       {
         ts = substr(\$0, 4, 19)
@@ -120,12 +119,12 @@ while read -r NAME IP; do
         }
       }
       END {
-        if (previous != "") print previous
+        if (previous != \"\") print previous
       }
     ' |
     while IFS= read -r file; do
       [[ -z "\$file" ]] && continue
-      f='$LOG_DIR/\$file'
+      f=\"$LOG_DIR/\$file\"
       sudo -n awk -v begin=${REMOTE_BEGIN_TIME} -v end=${REMOTE_END_TIME} -v file=\"\$f\" '
         match(\$0, /\"time\":\"([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})/, m) {
           t = m[1]
