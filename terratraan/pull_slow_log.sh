@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -u
 
@@ -12,9 +11,6 @@ CLUSTER="$CLUSTER_NAME"
 BEGIN_TIME="$BEGIN_TIME_ISO"
 END_TIME="$END_TIME_ISO"
 
-# Slow log location on TiDB SQL nodes.
-# Set to 1 to print remote file-selection details to stderr.
-# This does not pollute the gzip output.
 # Local output directory
 OUT_DIR="./tidb_slow_logs_${CLUSTER}_$(date +%Y%m%d_%H%M%S)"
 
@@ -62,7 +58,7 @@ for f in "${rotated_files[@]}"; do
   fi
 done
 
-sort -o "$tmp_list" "$tmp_list"
+LC_ALL=C sort -o "$tmp_list" "$tmp_list"
 
 prev_end="0000-00-00T00:00:00Z"
 last_rotated_end="0000-00-00T00:00:00Z"
@@ -86,9 +82,10 @@ done < "$tmp_list"
 
 rm -f "$tmp_list"
 
-# The current tidb-slow.log has no timestamp in the file name.
-# Always include it when it exists. The awk block filter will still keep only the requested window.
-if [[ -f tidb-slow.log ]]; then
+# The current tidb-slow.log has no timestamp in the file name. It only contains
+# records written after the last rotation, so skip it when the last rotation
+# already happened after the query window ends.
+if [[ -f tidb-slow.log && ! "$last_rotated_end" > "$end_cmp" ]]; then
   selected_files+=( "tidb-slow.log" )
 fi
 
