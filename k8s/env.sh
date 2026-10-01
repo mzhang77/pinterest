@@ -4,13 +4,13 @@
 # Override any value before running a script, for example:
 #   NAMESPACE=shopads-index-prod BEGIN_TIME="2026-09-08 06:30:00" ./pull_tidb_log.sh
 
-: "${NAMESPACE:=shopads-index-prod}"
+: "${NAMESPACE:=shared-dev}"
 : "${CLUSTER_NAME:=${NAMESPACE}-eks}"
 
 # Canonical input time format, in UTC:
 #   YYYY-MM-DD HH:MM:SS
-: "${BEGIN_TIME:=2026-09-08 06:30:00}"
-: "${END_TIME:=2026-09-08 09:00:00}"
+: "${BEGIN_TIME:=2026-10-01 00:00:00}"
+: "${END_TIME:=2026-10-03 00:00:00}"
 : "${TIMEZONE_OFFSET:=+00:00}"
 
 : "${INTERVAL_MINUTES:=30}"
