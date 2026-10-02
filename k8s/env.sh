@@ -9,7 +9,7 @@
 
 # Canonical input time format, in UTC:
 #   YYYY-MM-DD HH:MM:SS
-: "${BEGIN_TIME:=2026-09-25 16:00:00}"
+: "${BEGIN_TIME:=2026-09-26 04:00:00}"
 : "${END_TIME:=2026-09-26 08:00:00}"
 : "${TIMEZONE_OFFSET:=+00:00}"
 
