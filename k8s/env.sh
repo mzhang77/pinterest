@@ -4,7 +4,7 @@
 # Override any value before running a script, for example:
 #   NAMESPACE=shopads-index-prod BEGIN_TIME="2026-09-08 06:30:00" ./pull_tidb_log.sh
 
-: "${NAMESPACE:=mem-arm-prod}"
+: "${NAMESPACE:=mew-arm-prod}"
 : "${CLUSTER_NAME:=${NAMESPACE}-eks}"
 
 # Canonical input time format, in UTC:
