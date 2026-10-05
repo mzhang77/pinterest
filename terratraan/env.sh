@@ -4,9 +4,9 @@
 # Override any value before running a script, for example:
 #   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
-: "${CLUSTER_NAME:=pingraph-richpins-prod}"
-: "${BEGIN_TIME:=2026-09-29 18:50:00}"
-: "${END_TIME:=2026-09-29 20:20:00}"
+: "${CLUSTER_NAME:=bulbasaur-prod}"
+: "${BEGIN_TIME:=2026-10-04 16:30:00}"
+: "${END_TIME:=2026-10-04 19:30:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
 : "${INTERVAL_MINUTES:=20}"
