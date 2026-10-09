@@ -18,11 +18,11 @@ if [ -r "$PINTEREST_CONF" ]; then
 fi
 
 : "${CLUSTER_NAME:=${TERRATRAAN_CLUSTER:?set TERRATRAAN_CLUSTER in $PINTEREST_CONF, or export CLUSTER_NAME}}"
-: "${BEGIN_TIME:=2026-10-05 16:30:00}"
-: "${END_TIME:=2026-10-05 16:35:00}"
+: "${BEGIN_TIME:=2026-10-09 15:15:00}"
+: "${END_TIME:=2026-10-09 16:15:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
-: "${INTERVAL_MINUTES:=5}"
+: "${INTERVAL_MINUTES:=20}"
 # Optional awk regular expression. Matching CDC log lines are excluded from output.
 : "${CDC_LOG_FILTER_PATTERN:=scan window local advance due to pending barrier}"
 
