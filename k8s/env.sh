@@ -2,9 +2,22 @@
 
 # Common environment for the k8s helper scripts.
 # Override any value before running a script, for example:
-#   NAMESPACE=shopads-index-prod BEGIN_TIME="2026-09-08 06:30:00" ./pull_tidb_log.sh
+#   NAMESPACE=my-namespace BEGIN_TIME="2026-09-08 06:30:00" ./pull_tidb_log.sh
 
-: "${NAMESPACE:=mew-arm-prod}"
+# Machine-specific settings (hostnames, cert paths, default cluster, Clinic token) live in a
+# private file outside this repo, never in the scripts. Override its path with PINTEREST_CONF.
+: "${PINTEREST_CONF:=$HOME/.config/pingcap/pinterest}"
+if [ -r "$PINTEREST_CONF" ]; then
+    _conf_perm="$(stat -c '%a' "$PINTEREST_CONF" 2>/dev/null || stat -f '%Lp' "$PINTEREST_CONF" 2>/dev/null)"
+    case "$_conf_perm" in
+        ""|*00) ;;
+        *) echo "[WARN] $PINTEREST_CONF has permissions $_conf_perm; run: chmod 600 $PINTEREST_CONF" >&2 ;;
+    esac
+    unset _conf_perm
+    . "$PINTEREST_CONF"
+fi
+
+: "${NAMESPACE:=${K8S_NAMESPACE:?set K8S_NAMESPACE in $PINTEREST_CONF, or export NAMESPACE}}"
 : "${CLUSTER_NAME:=${NAMESPACE}-eks}"
 
 # Canonical input time format, in UTC:

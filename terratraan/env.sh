@@ -2,9 +2,22 @@
 
 # Common environment for the terratraan helper scripts.
 # Override any value before running a script, for example:
-#   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
+#   CLUSTER_NAME=my-cluster-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
-: "${CLUSTER_NAME:=bulbasaur-prod}"
+# Machine-specific settings (hostnames, cert paths, default cluster, Clinic token) live in a
+# private file outside this repo, never in the scripts. Override its path with PINTEREST_CONF.
+: "${PINTEREST_CONF:=$HOME/.config/pingcap/pinterest}"
+if [ -r "$PINTEREST_CONF" ]; then
+    _conf_perm="$(stat -c '%a' "$PINTEREST_CONF" 2>/dev/null || stat -f '%Lp' "$PINTEREST_CONF" 2>/dev/null)"
+    case "$_conf_perm" in
+        ""|*00) ;;
+        *) echo "[WARN] $PINTEREST_CONF has permissions $_conf_perm; run: chmod 600 $PINTEREST_CONF" >&2 ;;
+    esac
+    unset _conf_perm
+    . "$PINTEREST_CONF"
+fi
+
+: "${CLUSTER_NAME:=${TERRATRAAN_CLUSTER:?set TERRATRAAN_CLUSTER in $PINTEREST_CONF, or export CLUSTER_NAME}}"
 : "${BEGIN_TIME:=2026-10-05 16:30:00}"
 : "${END_TIME:=2026-10-05 16:35:00}"
 : "${LOG_DIR:=/var/log/tidb}"

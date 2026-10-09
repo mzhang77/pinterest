@@ -49,7 +49,7 @@ echo "Querying instances from getin..."
 getin "$CLUSTER" | awk -v cluster="$CLUSTER" '
   BEGIN {
     # Only keep exact pd nodes for this cluster:
-    # infra-tidb-pd-ads-index-staging-prod-0a019fa2
+    # infra-tidb-pd-<cluster>-<id>
     pattern = "^infra-tidb-pd-" cluster "-[A-Za-z0-9]+$"
   }
 

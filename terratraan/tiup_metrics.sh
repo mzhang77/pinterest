@@ -21,15 +21,15 @@ Arguments:
 
 Examples:
   Bare-metal / VM:
-  $(basename "$0") shared-vanilla-prod -7h -4h                                          # relative time, auto-detect
-  $(basename "$0") shared-vanilla-prod -7h -4h vm                                       # relative time, force VM
-  $(basename "$0") shared-vanilla-prod -7h -4h prom                                     # relative time, force Prom
-  $(basename "$0") pikachu-prod "2026-01-28T01:59:00Z" "2026-01-28T03:30:00Z"           # absolute time (UTC)
-  $(basename "$0") pikachu-prod "2026-01-28T09:59:00+08:00" "2026-01-28T11:30:00+08:00" # absolute time (CST)
+  $(basename "$0") my-cluster-prod -7h -4h                                          # relative time, auto-detect
+  $(basename "$0") my-cluster-prod -7h -4h vm                                       # relative time, force VM
+  $(basename "$0") my-cluster-prod -7h -4h prom                                     # relative time, force Prom
+  $(basename "$0") my-cluster-prod "2026-01-28T01:59:00Z" "2026-01-28T03:30:00Z"           # absolute time (UTC)
+  $(basename "$0") my-cluster-prod "2026-01-28T09:59:00+08:00" "2026-01-28T11:30:00+08:00" # absolute time (CST)
 
   Kubernetes (TiDB Operator):
-  $(basename "$0") pingraph-board-prod-eks -7h -4h k8s                                  # relative time
-  $(basename "$0") pingraph-board-prod-eks "2026-03-18T16:30:00Z" "2026-03-18T17:30:00Z" k8s  # absolute time
+  $(basename "$0") my-k8s-cluster-eks -7h -4h k8s                                  # relative time
+  $(basename "$0") my-k8s-cluster-eks "2026-03-18T16:30:00Z" "2026-03-18T17:30:00Z" k8s  # absolute time
 
 Prerequisites:
   Bare-metal/VM: Run 'hologram use engineer' before executing.
@@ -187,28 +187,17 @@ if [[ "$metrics_type" == "vm" ]]; then
 else
     prometheus_addr="localhost:9090/_/tsdb"
 fi
-# Clinic token: never hardcode it in this repo. Lookup order:
-#   1. PINGCAP_CLINIC_TOKEN / CLINIC_TOKEN env var
-#   2. file at $CLINIC_TOKEN_FILE (default: ~/.config/pingcap/clinic_token)
-# Create the default file once with:
-#   mkdir -p ~/.config/pingcap && printf '%s' '<token>' > ~/.config/pingcap/clinic_token && chmod 600 ~/.config/pingcap/clinic_token
-clinic_token="${PINGCAP_CLINIC_TOKEN:-${CLINIC_TOKEN:-}}"
-if [[ -z "$clinic_token" ]]; then
-    clinic_token_file="${CLINIC_TOKEN_FILE:-$HOME/.config/pingcap/clinic_token}"
-    if [[ -r "$clinic_token_file" ]]; then
-        # Warn if the token file is accessible by group/others.
-        token_perm=$(stat -c '%a' "$clinic_token_file" 2>/dev/null || stat -f '%Lp' "$clinic_token_file" 2>/dev/null)
-        if [[ -n "$token_perm" && "${token_perm: -2}" != "00" ]]; then
-            echo >&2 "[WARN] $clinic_token_file has permissions $token_perm; run: chmod 600 $clinic_token_file"
-        fi
-        clinic_token=$(tr -d '[:space:]' < "$clinic_token_file")
-    fi
-fi
+# Clinic token and environment-specific settings come from $PINTEREST_CONF (see env.sh).
+clinic_token="${CLINIC_TOKEN:-${PINGCAP_CLINIC_TOKEN:-}}"
 if [[ -z "$clinic_token" ]]
 then
-    echo >&2 "[ERROR] could not find PingCAP clinic token. Put it in ${CLINIC_TOKEN_FILE:-$HOME/.config/pingcap/clinic_token} (chmod 600), or set PINGCAP_CLINIC_TOKEN."
+    echo >&2 "[ERROR] could not find PingCAP clinic token: set CLINIC_TOKEN in ${PINTEREST_CONF}"
     exit 1
 fi
+: "${PD_DOMAIN:?set PD_DOMAIN in $PINTEREST_CONF}"
+: "${TLS_CA_FILE:?set TLS_CA_FILE in $PINTEREST_CONF}"
+: "${TLS_CERT_FILE:?set TLS_CERT_FILE in $PINTEREST_CONF}"
+: "${TLS_KEY_FILE:?set TLS_KEY_FILE in $PINTEREST_CONF}"
 
 output_dir="diag-$cluster-$(date -u +%s)"
 pd_host_name=$(getin -H pd-"$cluster" | head -n1)
@@ -217,7 +206,7 @@ then
     echo >&2 "[ERROR] could not identify PD host for cluster $cluster"
     exit 1
 fi
-pd_host="$pd_host_name.ec2.pin220.com:2379"
+pd_host="$pd_host_name.$PD_DOMAIN:2379"
 
 remote_script=$(cat <<EoSH
 if ! [[ -f ~/.tiup/bin/tiup ]]
@@ -234,9 +223,9 @@ mkdir "$output_dir"
     --pd="$pd_host" \
     --prometheus="$prometheus_addr" \
     --metricsfilter="node,process,probe,tidb,process,go_,tikv,pd,grpc,etcd,tiflash,binlog,ticdc,br,lightning,net_conntrack,os_fd,scrape,unistore,up" \
-    --ca-file /var/lib/normandie/fuse/ca/root \
-    --cert-file /var/lib/normandie/fuse/chain/generic \
-    --key-file /var/lib/normandie/fuse/key/generic \
+    --ca-file "$TLS_CA_FILE" \
+    --cert-file "$TLS_CERT_FILE" \
+    --key-file "$TLS_KEY_FILE" \
     --output "$output_dir" \
     --from "$from" --to "$to" --yes
 ~/.tiup/bin/tiup diag upload "$output_dir"

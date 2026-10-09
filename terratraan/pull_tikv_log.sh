@@ -132,7 +132,7 @@ echo "Querying instances from getin..."
 getin "$CLUSTER" | awk -v cluster="$CLUSTER" '
   BEGIN {
     # Only keep exact TiKV nodes for this cluster:
-    # infra-tidb-tikv-bulbasaur-prod-0a0116df
+    # infra-tidb-tikv-<cluster>-<id>
     pattern = "^infra-tidb-tikv-" cluster "-[A-Za-z0-9]+$"
   }
 

@@ -146,7 +146,7 @@ echo "Querying instances from getin..."
 getin "$CLUSTER" | awk -v cluster="$CLUSTER" '
   BEGIN {
     # Only keep exact TiCDC nodes for this cluster:
-    # infra-tidb-ticdc-bulbasaur-prod-0a0116df
+    # infra-tidb-ticdc-<cluster>-<id>
     pattern = "^infra-tidb-ticdc-" cluster "-[A-Za-z0-9]+$"
   }
 

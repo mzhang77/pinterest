@@ -13,8 +13,8 @@ usage() {
   echo "  $(basename "$0") <host> <remote-path> [local-directory]"
   echo
   echo "Example:"
-  echo "  $(basename "$0") infra-tidb-monitoring-bulbasaur-prod-0a01d166 \\"
-  echo "    /mnt/pingcap_diag_data/diag-bulbasaur-prod-1785614626.diag"
+  echo "  $(basename "$0") infra-tidb-monitoring-<cluster>-<id> \\"
+  echo "    /mnt/pingcap_diag_data/diag-<cluster>-<timestamp>.diag"
   exit 1
 }
 
