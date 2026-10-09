@@ -18,7 +18,7 @@ if [ -r "$PINTEREST_CONF" ]; then
 fi
 
 : "${CLUSTER_NAME:=${TERRATRAAN_CLUSTER:?set TERRATRAAN_CLUSTER in $PINTEREST_CONF, or export CLUSTER_NAME}}"
-: "${BEGIN_TIME:=2026-10-09 14:15:00}"
+: "${BEGIN_TIME:=2026-10-09 14:00:00}"
 : "${END_TIME:=2026-10-09 21:00:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
