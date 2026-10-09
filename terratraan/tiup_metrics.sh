@@ -187,10 +187,26 @@ if [[ "$metrics_type" == "vm" ]]; then
 else
     prometheus_addr="localhost:9090/_/tsdb"
 fi
-clinic_token=REDACTED_CLINIC_TOKEN
-if ! [[ $clinic_token ]]
+# Clinic token: never hardcode it in this repo. Lookup order:
+#   1. PINGCAP_CLINIC_TOKEN / CLINIC_TOKEN env var
+#   2. file at $CLINIC_TOKEN_FILE (default: ~/.config/pingcap/clinic_token)
+# Create the default file once with:
+#   mkdir -p ~/.config/pingcap && printf '%s' '<token>' > ~/.config/pingcap/clinic_token && chmod 600 ~/.config/pingcap/clinic_token
+clinic_token="${PINGCAP_CLINIC_TOKEN:-${CLINIC_TOKEN:-}}"
+if [[ -z "$clinic_token" ]]; then
+    clinic_token_file="${CLINIC_TOKEN_FILE:-$HOME/.config/pingcap/clinic_token}"
+    if [[ -r "$clinic_token_file" ]]; then
+        # Warn if the token file is accessible by group/others.
+        token_perm=$(stat -c '%a' "$clinic_token_file" 2>/dev/null || stat -f '%Lp' "$clinic_token_file" 2>/dev/null)
+        if [[ -n "$token_perm" && "${token_perm: -2}" != "00" ]]; then
+            echo >&2 "[WARN] $clinic_token_file has permissions $token_perm; run: chmod 600 $clinic_token_file"
+        fi
+        clinic_token=$(tr -d '[:space:]' < "$clinic_token_file")
+    fi
+fi
+if [[ -z "$clinic_token" ]]
 then
-    echo >&2 "[ERROR] could not find PingCAP clinic token - please set PINGCAP_CLINIC_TOKEN"
+    echo >&2 "[ERROR] could not find PingCAP clinic token. Put it in ${CLINIC_TOKEN_FILE:-$HOME/.config/pingcap/clinic_token} (chmod 600), or set PINGCAP_CLINIC_TOKEN."
     exit 1
 fi
 
