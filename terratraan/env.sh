@@ -5,11 +5,11 @@
 #   CLUSTER_NAME=foo-prod BEGIN_TIME="2026-09-03 17:50:00" ./pull_cdc_log.sh
 
 : "${CLUSTER_NAME:=bulbasaur-prod}"
-: "${BEGIN_TIME:=2026-10-04 16:30:00}"
-: "${END_TIME:=2026-10-04 19:30:00}"
+: "${BEGIN_TIME:=2026-10-05 16:30:00}"
+: "${END_TIME:=2026-10-05 16:35:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
-: "${INTERVAL_MINUTES:=20}"
+: "${INTERVAL_MINUTES:=5}"
 # Optional awk regular expression. Matching CDC log lines are excluded from output.
 : "${CDC_LOG_FILTER_PATTERN:=scan window local advance due to pending barrier}"
 
