@@ -130,6 +130,7 @@ SUMMARY_FILE="${OUT_DIR}/collection_summary.txt"
   echo "remote_log_dir=${ROCKSDB_LOG_DIR}"
   echo "log_prefix=${ROCKSDB_LOG_PREFIX}"
   echo "filter_pattern=${ROCKSDB_LOG_FILTER_PATTERN}"
+  echo "instance_filter=${TIKV_INSTANCE_FILTER}"
   echo "output_dir=${OUT_DIR}"
   echo
 } > "$SUMMARY_FILE"
@@ -140,25 +141,27 @@ echo "End time:    ${END_TIME}"
 echo "Remote dir:  ${ROCKSDB_LOG_DIR}"
 echo "Log prefix:  ${ROCKSDB_LOG_PREFIX}"
 echo "Filter:      ${ROCKSDB_LOG_FILTER_PATTERN:-<none>}"
+echo "Instances:   ${TIKV_INSTANCE_FILTER:-<all>}"
 echo "Debug:       ${DEBUG}"
 echo "Output dir:  ${OUT_DIR}"
 echo
 
 echo "Querying instances from getin..."
-getin "$CLUSTER" | awk -v cluster="$CLUSTER" '
+getin "$CLUSTER" | awk -v cluster="$CLUSTER" -v instance_filter="$TIKV_INSTANCE_FILTER" '
   BEGIN {
     # Only keep exact TiKV nodes for this cluster:
     # infra-tidb-tikv-<cluster>-<id>
     pattern = "^infra-tidb-tikv-" cluster "-[A-Za-z0-9]+$"
   }
 
-  $1 ~ pattern && $2 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/ {
+  $1 ~ pattern && $2 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/ &&
+  (instance_filter == "" || $1 ~ instance_filter) {
     print $1, $2
   }
 ' > "$TMP_INSTANCES"
 
 if [[ ! -s "$TMP_INSTANCES" ]]; then
-  echo "No TiKV instances found for cluster: ${CLUSTER}"
+  echo "No TiKV instances found for cluster: ${CLUSTER} (instance filter: ${TIKV_INSTANCE_FILTER:-<none>})"
   exit 1
 fi
 

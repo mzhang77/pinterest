@@ -18,11 +18,19 @@ if [ -r "$PINTEREST_CONF" ]; then
 fi
 
 : "${CLUSTER_NAME:=${TERRATRAAN_CLUSTER:?set TERRATRAAN_CLUSTER in $PINTEREST_CONF, or export CLUSTER_NAME}}"
-: "${BEGIN_TIME:=2026-10-09 14:45:00}"
-: "${END_TIME:=2026-10-09 16:45:00}"
+# Previous window: 2026-10-09 14:45:00 -> 2026-10-09 16:45:00
+# NAID-12273: from DDL job 5975 start to where the existing TiKV/RocksDB logs begin.
+: "${BEGIN_TIME:=2026-10-08 17:00:00}"
+: "${END_TIME:=2026-10-09 14:15:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
 : "${INTERVAL_MINUTES:=20}"
+# Optional awk regular expression matched against the TiKV instance name
+# (infra-tidb-tikv-<cluster>-<id>). Only matching instances are collected by
+# pull_tikv_log.sh and pull_rocksdb_log.sh. Empty = collect all TiKV instances.
+# Example: TIKV_INSTANCE_FILTER='0a033dcb|0a03b712'
+# NAID-12273 (temporary): RCA node 0a033dcb + the 3 nodes uploaded to Jira.
+: "${TIKV_INSTANCE_FILTER=0a033dcb|0a03b712|0a03eb3e|0a03eb7c}"
 # Optional awk regular expression. Matching CDC log lines are excluded from output.
 : "${CDC_LOG_FILTER_PATTERN:=scan window local advance due to pending barrier}"
 
