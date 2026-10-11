@@ -107,6 +107,16 @@ awk -v begin="$begin" -v end="$end" '\''
 
 mkdir -p "$OUT_DIR"
 
+SUMMARY_FILE="${OUT_DIR}/collection_summary.txt"
+{
+  echo "cluster=${CLUSTER}"
+  echo "begin_time=${BEGIN_TIME}"
+  echo "end_time=${END_TIME}"
+  echo "remote_log_dir=${LOG_DIR}"
+  echo "output_dir=${OUT_DIR}"
+  echo
+} > "$SUMMARY_FILE"
+
 echo "Cluster:     ${CLUSTER}"
 echo "Begin time:  ${BEGIN_TIME}"
 echo "End time:    ${END_TIME}"
@@ -141,6 +151,7 @@ total="$(wc -l < "$TMP_INSTANCES" | tr -d ' ')"
 count=0
 success=0
 failed=0
+empty=0
 
 while read -r NAME IP; do
   [[ -z "$NAME" || -z "$IP" ]] && continue
@@ -169,6 +180,7 @@ while read -r NAME IP; do
       echo "Command succeeded but output is empty."
       rm -f "$OUT_FILE"
       success=$((success + 1))
+      empty=$((empty + 1))
     fi
   else
     echo "Failed to collect from ${NAME} (${IP}), exit code: ${rc}"
@@ -176,11 +188,25 @@ while read -r NAME IP; do
     failed=$((failed + 1))
   fi
 
+  {
+    echo "instance=${NAME} ip=${IP} rc=${rc} output=${OUT_FILE}"
+  } >> "$SUMMARY_FILE"
+
   echo
 done < "$TMP_INSTANCES"
+
+{
+  echo
+  echo "checked=${count}/${total}"
+  echo "succeeded=${success}"
+  echo "empty=${empty}"
+  echo "failed=${failed}"
+} >> "$SUMMARY_FILE"
 
 echo "Done."
 echo "Checked: ${count}/${total}"
 echo "Succeeded: ${success}"
+echo "Empty: ${empty}"
 echo "Failed: ${failed}"
 echo "Output dir: ${OUT_DIR}"
+echo "Summary: ${SUMMARY_FILE}"

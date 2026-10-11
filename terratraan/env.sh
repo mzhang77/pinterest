@@ -28,9 +28,7 @@ fi
 # Optional awk regular expression matched against the TiKV instance name
 # (infra-tidb-tikv-<cluster>-<id>). Only matching instances are collected by
 # pull_tikv_log.sh and pull_rocksdb_log.sh. Empty = collect all TiKV instances.
-# Example: TIKV_INSTANCE_FILTER='0a033dcb|0a03b712'
-# NAID-12273 (temporary): RCA node 0a033dcb + the 3 nodes uploaded to Jira.
-: "${TIKV_INSTANCE_FILTER=0a033dcb|0a03b712|0a03eb3e|0a03eb7c}"
+: "${TIKV_INSTANCE_FILTER=}"
 # Optional awk regular expression. Matching CDC log lines are excluded from output.
 : "${CDC_LOG_FILTER_PATTERN:=scan window local advance due to pending barrier}"
 
