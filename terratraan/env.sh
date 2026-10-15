@@ -18,10 +18,12 @@ if [ -r "$PINTEREST_CONF" ]; then
 fi
 
 : "${CLUSTER_NAME:=${TERRATRAAN_CLUSTER:?set TERRATRAAN_CLUSTER in $PINTEREST_CONF, or export CLUSTER_NAME}}"
-# Previous window: 2026-10-09 14:45:00 -> 2026-10-09 16:45:00
-# NAID-12273: from DDL job 5975 start to where the existing TiKV/RocksDB logs begin.
-: "${BEGIN_TIME:=2026-10-08 17:00:00}"
-: "${END_TIME:=2026-10-09 14:15:00}"
+# Previous window (NAID-12273): 2026-10-08 17:00:00 -> 2026-10-09 14:15:00
+# NAID-12205: Rachel's most recent node_2425 attempt on the isolated 8.5.8 newarch TiCDC node.
+# Her "Changefeed Checkpoint Lag" screenshot (EDT, UTC-4): lag rises ~15:02 EDT, all lines back to 0 by ~15:27 EDT
+# = ~19:02 -> ~19:27 UTC. Margin added to catch changefeed creation and the aftermath. All times here are UTC.
+: "${BEGIN_TIME:=2026-10-15 18:55:00}"
+: "${END_TIME:=2026-10-15 19:35:00}"
 : "${LOG_DIR:=/var/log/tidb}"
 : "${DEBUG:=1}"
 : "${INTERVAL_MINUTES:=20}"
