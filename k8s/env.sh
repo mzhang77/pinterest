@@ -22,11 +22,11 @@ fi
 
 # Canonical input time format, in UTC:
 #   YYYY-MM-DD HH:MM:SS
-: "${BEGIN_TIME:=2026-10-27 00:00:00}"
-: "${END_TIME:=2026-10-27 02:00:00}"
+: "${BEGIN_TIME:=2026-10-26 16:00:00}"
+: "${END_TIME:=2026-10-26 19:00:00}"
 : "${TIMEZONE_OFFSET:=+00:00}"
 
-: "${INTERVAL_MINUTES:=120}"
+: "${INTERVAL_MINUTES:=60}"
 : "${DIAG_BASE_URL:=http://localhost:4917}"
 : "${DIAG_NAMESPACE:=tidb-admin}"
 : "${DIAG_SERVICE:=diag}"
