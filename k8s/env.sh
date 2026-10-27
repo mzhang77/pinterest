@@ -22,8 +22,8 @@ fi
 
 # Canonical input time format, in UTC:
 #   YYYY-MM-DD HH:MM:SS
-: "${BEGIN_TIME:=2026-10-23 00:00:00}"
-: "${END_TIME:=2026-10-23 02:00:00}"
+: "${BEGIN_TIME:=2026-10-27 00:00:00}"
+: "${END_TIME:=2026-10-27 02:00:00}"
 : "${TIMEZONE_OFFSET:=+00:00}"
 
 : "${INTERVAL_MINUTES:=120}"
